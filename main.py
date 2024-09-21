@@ -24,16 +24,15 @@ def check_mail(email, state):
             return 0
 
 
-def send_mail(code, to_addrs):
-    from_addr = "noreply@xn--80adghmg3aabhlj7izc.xn--p1ai"
+def send_mail(code, to_addrs, from_addr):
     lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
-             f"Your verification link is: https://xn--80adghmg3aabhlj7izc.xn--p1ai/verify/{code}"]
+             code]
     msg = "\r\n".join(lines)
     smtp = smtplib.SMTP('mail.hosting.reg.ru', 587)
     smtp.set_debuglevel(False)
     smtp.connect('mail.hosting.reg.ru', 587)
     smtp.ehlo()
-    smtp.login('noreply@xn--80adghmg3aabhlj7izc.xn--p1ai', 'AntonVolky2009*')
+    smtp.login(from_addr, 'AntonVolky2009*')
     smtp.sendmail(from_addr, to_addrs, msg)
     smtp.quit()
 
@@ -55,7 +54,7 @@ def index():
                     t = open("trips.txt", "a+", encoding="utf8")
                     t.seek(0)
                     tl = [line.strip() for line in t]
-                    print(flask.request.form.get("description"))
+                    '''print(flask.request.form.get("description"))
                     for i in range(0, len(tl), 7):
                         print("var", tl[i], "set to ---")
                         if flask.request.form.get("var" + tl[i]) == "1":
@@ -83,11 +82,11 @@ def index():
                                     lines.index(str(tl[i]) + '\n') + 1].replace(" " + str(flask.request.cookies.get("key")), '')
                             with open("tripsStatus.txt", 'w') as file:
                                 file.writelines(lines)
-                                file.close()
+                                file.close()'''
                     if flask.request.form.get("description") != '':
                         t.write("onReview" + '\n')
                         t.write(flask.request.form.get("location") + '\n')
-                        t.write(flask.request.form.get("description") + '\n')
+                        t.write(flask.request.form.get("description").replace('\n', ' ') + '\n')
                         t.write(flask.request.form.get("class") + '\n')
                         t.write(flask.request.form.get("cost") + '\n')
                         t.write('На проверке\n')
@@ -135,7 +134,7 @@ def index():
                     t = open("trips.txt", "a+", encoding="utf8")
                     t.seek(0)
                     tl = [line.strip() for line in t]
-                    print(flask.request.form.get("description"))
+                    '''print(flask.request.form.get("description"))
                     for i in range(0, len(tl), 7):
                         print("var", tl[i], "set to ---")
                         if flask.request.form.get("var" + tl[i]) == "1":
@@ -163,15 +162,16 @@ def index():
                                     lines.index(str(tl[i]) + '\n') + 1].replace(" " + str(flask.request.cookies.get("key")), '')
                             with open("tripsStatus.txt", 'w') as file:
                                 file.writelines(lines)
-                                file.close()
+                                file.close()'''
                     if flask.request.form.get("description") != '':
                         t.write("onReview" + '\n')
                         t.write(flask.request.form.get("location") + '\n')
-                        t.write(flask.request.form.get("description") + '\n')
+                        t.write(flask.request.form.get("description").replace('\n', ' ') + '\n')
                         t.write(flask.request.form.get("class") + '\n')
                         t.write(flask.request.form.get("cost") + '\n')
                         t.write('На проверке\n')
                         t.write(flask.request.form.get("quant") + '\n')
+                        t.close()
                         with open("tripsStatus.txt", 'a+', encoding="utf-8") as file:
                             file.write("onReview\n")
                             u = open("users.txt", "a+", encoding="utf8")
@@ -241,6 +241,21 @@ def card(path):
                             lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
                                                                        :-1] + " " + str(
                                 flask.request.cookies.get("key")) + "\n"
+                        u = open("users.txt", "a+", encoding="utf8")
+                        u.seek(0)
+                        ul = [line.strip() for line in u]
+                        u.close()
+                        v = open("verified.txt", "a+", encoding="utf8")
+                        v.seek(0)
+                        vl = [line.strip() for line in v]
+                        v.close()
+                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(tl[(path - 1) * 7 + 6]):
+                            send_mail(
+                                "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
+                                    0] + " on letting " + ul[
+                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
+                                "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
+                                "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                         with open("tripsStatus.txt", 'w') as file:
                             file.writelines(lines)
                             file.close()
@@ -266,11 +281,11 @@ def card(path):
                     ts = open("tripsStatus.txt", "a+", encoding="utf8")
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
-                    print(tl[(path - 1) * 6])
-                    if tl[(path - 1) * 6] != "onReview":
+                    print(tl[(path - 1) * 7])
+                    if tl[(path - 1) * 7] != "onReview":
                         fl = {"location": tl[(path - 1) * 7 + 1], "description": tl[(path - 1) * 7 + 2],
                               "class": tl[(path - 1) * 7 + 3], "cost": "0", "count": tl[(path - 1) * 7],
-                              "state": tl[(path - 1) * 7 + 5], "quant": tl[(path - 1) * 7 + 6]}
+                              "state": tl[(path - 1) * 7 + 5], "quant": int(tl[(path - 1) * 7 + 6])}
                         lcodes = tsl[tsl.index(str(path)) + 1].split()
                         l = list()
                         n = open("names.txt", "a+", encoding="utf8")
@@ -299,7 +314,7 @@ def card(path):
                     n.close()
                     del key
                     print(fsd)
-                    return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l)
+                    return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l, ac=actual_quant)
             else:
                 print("verified")
                 if flask.request.method == "POST":
@@ -318,6 +333,21 @@ def card(path):
                             lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
                                                                        :-1] + " " + str(
                                 flask.request.cookies.get("key")) + "\n"
+                        u = open("users.txt", "a+", encoding="utf8")
+                        u.seek(0)
+                        ul = [line.strip() for line in u]
+                        u.close()
+                        v = open("verified.txt", "a+", encoding="utf8")
+                        v.seek(0)
+                        vl = [line.strip() for line in v]
+                        v.close()
+                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(tl[(path - 1) * 7 + 6]):
+                            send_mail(
+                                "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
+                                    0] + " on letting " + ul[
+                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
+                                "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
+                                "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                         with open("tripsStatus.txt", 'w') as file:
                             file.writelines(lines)
                             file.close()
@@ -343,11 +373,11 @@ def card(path):
                     ts = open("tripsStatus.txt", "a+", encoding="utf8")
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
-                    print(tl[(path - 1) * 6])
-                    if tl[(path - 1) * 6] != "onReview":
+                    print(tl[(path - 1) * 7])
+                    if tl[(path - 1) * 7] != "onReview":
                         fl = {"location": tl[(path - 1) * 7 + 1], "description": tl[(path - 1) * 7 + 2],
                               "class": tl[(path - 1) * 7 + 3], "count": tl[(path - 1) * 7],
-                              "cost": tl[(path - 1) * 7 + 4], "state": tl[(path - 1) * 7 + 5], "quant": tl[(path - 1) * 7 + 6]}
+                              "cost": tl[(path - 1) * 7 + 4], "state": tl[(path - 1) * 7 + 5], "quant": int(tl[(path - 1) * 7 + 6])}
                         lcodes = tsl[tsl.index(str(path)) + 1].split()
                         l = list()
                         n = open("names.txt", "a+", encoding="utf8")
@@ -376,7 +406,7 @@ def card(path):
                     n.close()
                     del key
                     print(fsd)
-                    return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l)
+                    return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l, ac=actual_quant)
         else:
             return flask.render_template("index.html")
 
@@ -446,7 +476,7 @@ def register():
                                                 99999999999999999999999999999999999999999999999))
             else:
                 verifylink = str(random.randint(100000000, 1000000000000000000000000000000000000000000000))
-            send_mail(verifylink, flask.request.form.get("email"))
+            send_mail("Your verification code link is https://xn--80adghmg3aabhlj7izc.xn--p1ai/verify/" + str(verifylink), flask.request.form.get("email"), "noreply@xn--80adghmg3aabhlj7izc.xn--p1ai")
             md5_hashl = hashlib.new('md5')
             md5_hashl.update(verifylink.encode())
             md5_hashp = hashlib.new('md5')
@@ -476,7 +506,7 @@ def stylefiles(path):
     return flask.send_from_directory('style', path)
 
 
-@application.route('/verify/<path:path>')
+@application.route('/verify/<path:path>/')
 def verify(path):
     v = open("verified.txt", 'a+', encoding="utf-8")
     v.seek(0)
