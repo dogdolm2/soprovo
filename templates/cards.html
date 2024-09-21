@@ -40,7 +40,7 @@
 		<br>
 		<br>
         <div class="card">
-            <div class="card-header">
+            <div class="card-header text-bg-warning">
                 <div class="row">
                     <div class="col">
                         <h3><span class="badge text-bg-{% if fl.state == 'Согласованно'%}success{% elif fl.state == 'Отменено' %}danger{% else %}warning{% endif %}">{{fl.state}}</span></h3><h1 class="card-title">{{fl.location}}</h1>
@@ -55,13 +55,15 @@
                 </div>
             </div>
             <div class="card-body">
-                <p class="card-text">{{fl.description}}</p>
+                {% for line in fl.description %}
+                    <p class="card-text">{{line}}</p>
+                {% endfor %}
                 <br>
                 <br>
                 <div class="row">
                     <div class="col">
                         <input type="checkbox" class="btn-check" id="btn-check-{{fl.count}}" name="var{{path}}" value="1" {% if fsd[path] == True %} checked {% endif %} {% if ac >= fl.quant and fsd[path] == True %} disabled {% endif %}>
-                        <label class="btn btn-outline-warning" for="btn-check-{{fl.count}}">Хочу сюда</label>
+                        <label class="btn btn-outline-warning" for="btn-check-{{fl.count}}">{% if fsd[path] == True %}Передумал, отписаться{% else %}Хочу сюда{% endif %}</label>
                     </div>
                     <div class="col">
                         <input type="submit" class="btn-check" id="btn-{{fl.count}}">

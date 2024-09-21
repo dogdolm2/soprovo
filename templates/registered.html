@@ -41,19 +41,21 @@
     <br>
     {% for elem in fl %}
         <div class="card">
-            <div class="card-header">
+            <div class="card-header text-bg-warning">
                 <div class="row">
                     <div class="col">
-                        <h1 class="card-title"><a href="/trip/{{elem.count}}/">{{elem.location}}</a></h1>
+                        <h1><a href="/trip/{{elem.count}}/" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{elem.location}}</a></h1>
                     </div>
                     <div class="col"></div>
                     <div class="col">
-                        <h3 align="right">{{elem.class}}</h3>
+                        <h3 align="right" class="text-secondary">{{elem.class}}</h3>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <p class="card-text">{{elem.description}}</p>
+                {% for line in elem.description %}
+                    <p class="card-text">{{line}}</p>
+                {% endfor %}
                 <br>
                 <br>
                 <div class="row">
@@ -79,7 +81,7 @@
     </div>
     <br>
     <div class="mb-3">
-        <label for="exampleInput2" class="form-label"><p>Что будет?</p></label>
+        <label for="exampleInput2" class="form-label"><p>Программа и даты</p></label>
         <div class="input-group">
           <textarea class="form-control" aria-label="With textarea" id="exampleInput2" name="description"></textarea>
         </div>
