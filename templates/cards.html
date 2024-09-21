@@ -43,7 +43,7 @@
             <div class="card-header text-bg-warning">
                 <div class="row">
                     <div class="col">
-                        <h3><span class="badge text-bg-{% if fl.state == 'Согласованно'%}success{% elif fl.state == 'Отменено' %}danger{% else %}warning{% endif %}">{{fl.state}}</span></h3><h1 class="card-title">{{fl.location}}</h1>
+                        <h3><span class="badge text-bg-{% if fl.state == 'Согласованно'%}success{% elif fl.state == 'Отменено' %}danger{% else %}secondary{% endif %}">{{fl.state}}</span></h3><h1 class="card-title">{{fl.location}}</h1>
                     </div>
                     <div class="col"></div>
                     <div class="col">
