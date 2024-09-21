@@ -53,7 +53,9 @@
                 </div>
             </div>
             <div class="card-body">
-                <p class="card-text">{{elem.description}}</p>
+                {% for line in elem.description %}
+                    <p class="card-text">{{line}}</p>
+                {% endfor %}
                 <br>
                 <br>
                 <div class="row">
@@ -79,7 +81,7 @@
     </div>
     <br>
     <div class="mb-3">
-        <label for="exampleInput2" class="form-label"><p>Что будет?</p></label>
+        <label for="exampleInput2" class="form-label"><p>Программа и даты</p></label>
         <div class="input-group">
           <textarea class="form-control" aria-label="With textarea" id="exampleInput2" name="description"></textarea>
         </div>
