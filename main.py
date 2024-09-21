@@ -280,7 +280,7 @@ def card(path):
                         v.seek(0)
                         vl = [line.strip() for line in v]
                         print(vl)
-                        actual_quant = len(lcodes)
+                        actual_quant = len(lcodes) - 1
                         if int(fl["quant"]) <= actual_quant:
                             fl["state"] = "Участники набраны"
                         for i in range(1, len(lcodes)):
@@ -357,7 +357,7 @@ def card(path):
                         v.seek(0)
                         vl = [line.strip() for line in v]
                         print(vl)
-                        actual_quant = len(lcodes)
+                        actual_quant = len(lcodes) - 1
                         if int(fl["quant"]) <= actual_quant:
                             fl["state"] = "Участники набраны"
                         for i in range(1, len(lcodes)):
