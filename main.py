@@ -7,10 +7,6 @@ import smtplib
 application = flask.Flask("__name__")
 
 
-def student():
-    pass
-
-
 def check_mail(email, state):
     if state == "god":
         if email[-7:] == "@hse.ru":
@@ -133,6 +129,8 @@ def index():
                                 "class": tl[end + 1], "count": tl[i],
                                 "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
                             i = end + 5
+                        else:
+                            i = len(tl)
                     key = flask.request.cookies.get("key")
                     fsd = {}
                     for i in range(1, len(tsl), 2):
@@ -231,6 +229,8 @@ def index():
                                 "class": tl[end + 1], "count": tl[i],
                                 "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
                             i = end + 5
+                        else:
+                            i = len(tl)
                     key = flask.request.cookies.get("key")
                     fsd = {}
                     for i in range(1, len(tsl), 2):
