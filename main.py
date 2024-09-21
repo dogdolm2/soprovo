@@ -56,7 +56,7 @@ def index():
                     t.seek(0)
                     tl = [line.strip() for line in t]
                     print(flask.request.form.get("description"))
-                    for i in range(0, len(tl), 6):
+                    for i in range(0, len(tl), 7):
                         print("var", tl[i], "set to ---")
                         if flask.request.form.get("var" + tl[i]) == "1":
                             print("var", tl[i], "set to true")
@@ -64,9 +64,10 @@ def index():
                                 lines = file.readlines()
                                 file.close()
                             print(lines)
-                            lines[lines.index(str(tl[i]) + '\n') + 1] = str(lines[lines.index(tl[i] + '\n') + 1])[
-                                                                        :-1] + " " + str(
-                                flask.request.cookies.get("key")) + "\n"
+                            if str(flask.request.cookies.get("key")) not in lines[lines.index(str(tl[i]) + '\n') + 1]:
+                                lines[lines.index(str(tl[i]) + '\n') + 1] = str(lines[lines.index(tl[i] + '\n') + 1])[
+                                                                            :-1] + " " + str(
+                                    flask.request.cookies.get("key")) + "\n"
                             with open("tripsStatus.txt", 'w') as file:
                                 file.writelines(lines)
                                 file.close()
@@ -90,8 +91,17 @@ def index():
                         t.write(flask.request.form.get("class") + '\n')
                         t.write(flask.request.form.get("cost") + '\n')
                         t.write('На проверке\n')
+                        t.write(flask.request.form.get("quant") + '\n')
+                        t.close()
                         with open("tripsStatus.txt", 'a+', encoding="utf-8") as file:
                             file.write("onReview\n")
+                            u = open("users.txt", "a+", encoding="utf8")
+                            u.seek(0)
+                            ul = [line.strip() for line in u]
+                            v = open("verified.txt", "a+", encoding="utf8")
+                            v.seek(0)
+                            vl = [line.strip() for line in v]
+                            file.write(ul[vl.index(flask.request.cookies.get("key"))] + " ")
                             file.write(str(flask.request.cookies.get("key")) + "\n")
                     return flask.redirect("/")
                 else:
@@ -102,7 +112,7 @@ def index():
                     ts = open("tripsStatus.txt", "a+", encoding="utf8")
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
-                    for i in range(0, len(tl), 6):
+                    for i in range(0, len(tl), 7):
                         if tl[i] != "onReview":
                             fl.append(
                                 {"location": tl[i + 1], "description": tl[i + 2], "class": tl[i + 3], "count": tl[i]})
@@ -126,7 +136,7 @@ def index():
                     t.seek(0)
                     tl = [line.strip() for line in t]
                     print(flask.request.form.get("description"))
-                    for i in range(0, len(tl), 6):
+                    for i in range(0, len(tl), 7):
                         print("var", tl[i], "set to ---")
                         if flask.request.form.get("var" + tl[i]) == "1":
                             print("var", tl[i], "set to true")
@@ -134,9 +144,10 @@ def index():
                                 lines = file.readlines()
                                 file.close()
                             print(lines)
-                            lines[lines.index(str(tl[i]) + '\n') + 1] = str(lines[lines.index(tl[i] + '\n') + 1])[
-                                                                        :-1] + " " + str(
-                                flask.request.cookies.get("key")) + "\n"
+                            if str(flask.request.cookies.get("key")) not in lines[lines.index(str(tl[i]) + '\n') + 1]:
+                                lines[lines.index(str(tl[i]) + '\n') + 1] = str(lines[lines.index(tl[i] + '\n') + 1])[
+                                                                            :-1] + " " + str(
+                                    flask.request.cookies.get("key")) + "\n"
                             with open("tripsStatus.txt", 'w') as file:
                                 file.writelines(lines)
                                 file.close()
@@ -160,8 +171,16 @@ def index():
                         t.write(flask.request.form.get("class") + '\n')
                         t.write(flask.request.form.get("cost") + '\n')
                         t.write('На проверке\n')
+                        t.write(flask.request.form.get("quant") + '\n')
                         with open("tripsStatus.txt", 'a+', encoding="utf-8") as file:
                             file.write("onReview\n")
+                            u = open("users.txt", "a+", encoding="utf8")
+                            u.seek(0)
+                            ul = [line.strip() for line in u]
+                            v = open("verified.txt", "a+", encoding="utf8")
+                            v.seek(0)
+                            vl = [line.strip() for line in v]
+                            file.write(ul[vl.index(flask.request.cookies.get("key"))] + " ")
                             file.write(str(flask.request.cookies.get("key")) + "\n")
                     return flask.redirect("/")
                 else:
@@ -172,7 +191,7 @@ def index():
                     ts = open("tripsStatus.txt", "a+", encoding="utf8")
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
-                    for i in range(0, len(tl), 6):
+                    for i in range(0, len(tl), 7):
                         if tl[i] != "onReview":
                             fl.append(
                                 {"location": tl[i + 1], "description": tl[i + 2], "class": tl[i + 3], "count": tl[i],
@@ -218,9 +237,10 @@ def card(path):
                             lines = file.readlines()
                             file.close()
                         print(lines)
-                        lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
-                                                                   :-1] + " " + str(
-                            flask.request.cookies.get("key")) + "\n"
+                        if str(flask.request.cookies.get("key")) not in lines[lines.index(str(path) + '\n') + 1]:
+                            lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
+                                                                       :-1] + " " + str(
+                                flask.request.cookies.get("key")) + "\n"
                         with open("tripsStatus.txt", 'w') as file:
                             file.writelines(lines)
                             file.close()
@@ -248,9 +268,9 @@ def card(path):
                     tsl = [line.strip() for line in ts]
                     print(tl[(path - 1) * 6])
                     if tl[(path - 1) * 6] != "onReview":
-                        fl = {"location": tl[(path - 1) * 6 + 1], "description": tl[(path - 1) * 6 + 2],
-                              "class": tl[(path - 1) * 6 + 3], "cost": "0", "count": tl[(path - 1) * 6],
-                              "state": tl[(path - 1) * 6 + 5]}
+                        fl = {"location": tl[(path - 1) * 7 + 1], "description": tl[(path - 1) * 7 + 2],
+                              "class": tl[(path - 1) * 7 + 3], "cost": "0", "count": tl[(path - 1) * 7],
+                              "state": tl[(path - 1) * 7 + 5], "quant": tl[(path - 1) * 7 + 6]}
                         lcodes = tsl[tsl.index(str(path)) + 1].split()
                         l = list()
                         n = open("names.txt", "a+", encoding="utf8")
@@ -260,9 +280,12 @@ def card(path):
                         v.seek(0)
                         vl = [line.strip() for line in v]
                         print(vl)
-                        for code in lcodes:
-                            l.append(nl[vl.index(code)].replace("_", " "))
-                            if len(code) == 47:
+                        actual_quant = len(lcodes)
+                        if int(fl["quant"]) <= actual_quant:
+                            fl["state"] = "Участники набраны"
+                        for i in range(1, len(lcodes)):
+                            l.append(nl[vl.index(lcodes[i])].replace("_", " "))
+                            if len(lcodes[i]) == 47:
                                 l[-1] += " - сопровождающий"
                     key = flask.request.cookies.get("key")
                     fsd = {}
@@ -291,9 +314,10 @@ def card(path):
                             lines = file.readlines()
                             file.close()
                         print(lines)
-                        lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
-                                                                   :-1] + " " + str(
-                            flask.request.cookies.get("key")) + "\n"
+                        if str(flask.request.cookies.get("key")) not in lines[lines.index(str(path) + '\n') + 1]:
+                            lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
+                                                                       :-1] + " " + str(
+                                flask.request.cookies.get("key")) + "\n"
                         with open("tripsStatus.txt", 'w') as file:
                             file.writelines(lines)
                             file.close()
@@ -321,9 +345,9 @@ def card(path):
                     tsl = [line.strip() for line in ts]
                     print(tl[(path - 1) * 6])
                     if tl[(path - 1) * 6] != "onReview":
-                        fl = {"location": tl[(path - 1) * 6 + 1], "description": tl[(path - 1) * 6 + 2],
-                              "class": tl[(path - 1) * 6 + 3], "count": tl[(path - 1) * 6],
-                              "cost": tl[(path - 1) * 6 + 4], "state": tl[(path - 1) * 6 + 5]}
+                        fl = {"location": tl[(path - 1) * 7 + 1], "description": tl[(path - 1) * 7 + 2],
+                              "class": tl[(path - 1) * 7 + 3], "count": tl[(path - 1) * 7],
+                              "cost": tl[(path - 1) * 7 + 4], "state": tl[(path - 1) * 7 + 5], "quant": tl[(path - 1) * 7 + 6]}
                         lcodes = tsl[tsl.index(str(path)) + 1].split()
                         l = list()
                         n = open("names.txt", "a+", encoding="utf8")
@@ -333,9 +357,12 @@ def card(path):
                         v.seek(0)
                         vl = [line.strip() for line in v]
                         print(vl)
-                        for code in lcodes:
-                            l.append(nl[vl.index(code)].replace("_", " "))
-                            if len(code) == 47:
+                        actual_quant = len(lcodes)
+                        if int(fl["quant"]) <= actual_quant:
+                            fl["state"] = "Участники набраны"
+                        for i in range(1, len(lcodes)):
+                            l.append(nl[vl.index(lcodes[i])].replace("_", " "))
+                            if len(lcodes[i]) == 47:
                                 l[-1] += " - сопровождающий"
                     key = flask.request.cookies.get("key")
                     fsd = {}
