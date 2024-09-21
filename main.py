@@ -86,7 +86,9 @@ def index():
                     if flask.request.form.get("description") != '':
                         t.write("onReview" + '\n')
                         t.write(flask.request.form.get("location") + '\n')
-                        t.write(flask.request.form.get("description").replace('\n', ' ') + '\n')
+                        t.write("********" + '\n')
+                        t.write(flask.request.form.get("description") + '\n')
+                        t.write("********" + '\n')
                         t.write(flask.request.form.get("class") + '\n')
                         t.write(flask.request.form.get("cost") + '\n')
                         t.write('На проверке\n')
@@ -111,10 +113,26 @@ def index():
                     ts = open("tripsStatus.txt", "a+", encoding="utf8")
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
-                    for i in range(0, len(tl), 7):
+                    i = 0
+                    print(tl)
+                    while i < len(tl):
                         if tl[i] != "onReview":
-                            fl.append(
-                                {"location": tl[i + 1], "description": tl[i + 2], "class": tl[i + 3], "count": tl[i]})
+                            print(tl[i])
+                            start = -1
+                            end = -1
+                            desc = list()
+                            for i1 in range(i, len(tl)):
+                                if tl[i1] == "********" and start == -1:
+                                    start = i1
+                                elif tl[i1] == "********":
+                                    end = i1
+                                    break
+                                if start != -1 and tl[i1] != "********":
+                                    desc.append(tl[i1])
+                            fl.append({"location": tl[i + 1], "description": desc,
+                                "class": tl[end + 1], "count": tl[i],
+                                "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
+                            i = end + 5
                     key = flask.request.cookies.get("key")
                     fsd = {}
                     for i in range(1, len(tsl), 2):
@@ -166,7 +184,9 @@ def index():
                     if flask.request.form.get("description") != '':
                         t.write("onReview" + '\n')
                         t.write(flask.request.form.get("location") + '\n')
-                        t.write(flask.request.form.get("description").replace('\n', ' ') + '\n')
+                        t.write("********" + '\n')
+                        t.write(flask.request.form.get("description") + '\n')
+                        t.write("********" + '\n')
                         t.write(flask.request.form.get("class") + '\n')
                         t.write(flask.request.form.get("cost") + '\n')
                         t.write('На проверке\n')
@@ -191,11 +211,26 @@ def index():
                     ts = open("tripsStatus.txt", "a+", encoding="utf8")
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
-                    for i in range(0, len(tl), 7):
+                    i = 0
+                    print(tl)
+                    while i < len(tl):
                         if tl[i] != "onReview":
-                            fl.append(
-                                {"location": tl[i + 1], "description": tl[i + 2], "class": tl[i + 3], "count": tl[i],
-                                 "cost": tl[i + 4]})
+                            print(tl[i])
+                            start = -1
+                            end = -1
+                            desc = list()
+                            for i1 in range(i, len(tl)):
+                                if tl[i1] == "********" and start == -1:
+                                    start = i1
+                                elif tl[i1] == "********":
+                                    end = i1
+                                    break
+                                if start != -1 and tl[i1] != "********":
+                                    desc.append(tl[i1])
+                            fl.append({"location": tl[i + 1], "description": desc,
+                                "class": tl[end + 1], "count": tl[i],
+                                "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
+                            i = end + 5
                     key = flask.request.cookies.get("key")
                     fsd = {}
                     for i in range(1, len(tsl), 2):
@@ -282,10 +317,26 @@ def card(path):
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
                     print(tl[(path - 1) * 7])
-                    if tl[(path - 1) * 7] != "onReview":
-                        fl = {"location": tl[(path - 1) * 7 + 1], "description": tl[(path - 1) * 7 + 2],
-                              "class": tl[(path - 1) * 7 + 3], "cost": "0", "count": tl[(path - 1) * 7],
-                              "state": tl[(path - 1) * 7 + 5], "quant": int(tl[(path - 1) * 7 + 6])}
+                    cur = 0
+                    for i in range(len(tl)):
+                        if tl[i] == str(path):
+                            cur = i
+                            break
+                    start = -1
+                    end = -1
+                    desc = list()
+                    for i in range(cur, len(tl)):
+                        if tl[i] == "********" and start == -1:
+                            start = i
+                        elif tl[i] == "********":
+                            end = i
+                            break
+                        if start != -1 and tl[i] != "********":
+                            desc.append(tl[i])
+                    if tl[cur] != "onReview":
+                        fl = {"location": tl[cur + 1], "description": desc,
+                              "class": tl[end + 1], "count": tl[cur],
+                              "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
                         lcodes = tsl[tsl.index(str(path)) + 1].split()
                         l = list()
                         n = open("names.txt", "a+", encoding="utf8")
@@ -374,10 +425,26 @@ def card(path):
                     ts.seek(0)
                     tsl = [line.strip() for line in ts]
                     print(tl[(path - 1) * 7])
-                    if tl[(path - 1) * 7] != "onReview":
-                        fl = {"location": tl[(path - 1) * 7 + 1], "description": tl[(path - 1) * 7 + 2],
-                              "class": tl[(path - 1) * 7 + 3], "count": tl[(path - 1) * 7],
-                              "cost": tl[(path - 1) * 7 + 4], "state": tl[(path - 1) * 7 + 5], "quant": int(tl[(path - 1) * 7 + 6])}
+                    cur = 0
+                    for i in range(len(tl)):
+                        if tl[i] == str(path):
+                            cur = i
+                            break
+                    start = -1
+                    end = -1
+                    desc = list()
+                    for i in range(cur, len(tl)):
+                        if tl[i] == "********" and start == -1:
+                            start = i
+                        elif tl[i] == "********":
+                            end = i
+                            break
+                        if start != -1 and tl[i] != "********":
+                            desc.append(tl[i])
+                    if tl[cur] != "onReview":
+                        fl = {"location": tl[cur + 1], "description": desc,
+                              "class": tl[end + 1], "count": tl[cur],
+                              "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
                         lcodes = tsl[tsl.index(str(path)) + 1].split()
                         l = list()
                         n = open("names.txt", "a+", encoding="utf8")
