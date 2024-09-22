@@ -33,11 +33,18 @@
 </head>
 <body>
 <br>
+<div class="container">
+    <div class="row">
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col">
+            <div align="right"><a href="/clearcookie/" class="btn btn-danger btn-sm">Выйти</a></div>
+        </div>
+    </div>
+</div>
 <br>
 <form method="post" action="/">
 <div class="container">
-    <h4 class="thin">Все поездки на одном сайте и этот сайт - этот сайт!</h4>
-    <br>
     <br>
     {% for elem in fl %}
         <div class="card">
@@ -93,7 +100,15 @@
     <br>
     <div class="mb-3">
         <label for="exampleInput5" class="form-label"><p>Сколько стоит поездка с человека? (сопровождающий платит только за свою еду)</p></label>
-        <input type="text" class="form-control" id="exampleInput5" name="cost">
+        <div class="row">
+            <div class="col">
+                <input type="text" class="form-control" id="exampleInput5" name="cost">
+            </div>
+            <div class="col">
+                <p><a href="/money/"> Как сэкономить на поездке?</a></p>
+            </div>
+            <div class="col"></div>
+        </div>
     </div>
     <br>
     <div class="mb-3">
