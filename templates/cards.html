@@ -66,8 +66,8 @@
                         <label class="btn btn-outline-warning" for="btn-check-{{fl.count}}">{% if fsd[path] == True %}Передумал, отписаться{% else %}Хочу сюда{% endif %}</label>
                     </div>
                     <div class="col">
-                        <input type="submit" class="btn-check" id="btn-{{fl.count}}">
-                        <label class="btn btn-warning" for="btn-{{fl.count}}">Закрепить выбор</label>
+                        {% if ac < fl.quant or fsd[path] != True %}<input type="submit" class="btn-check" id="btn-{{fl.count}}">
+                        <label class="btn btn-warning" for="btn-{{fl.count}}">Закрепить выбор</label>{% endif %}
                     </div>
                     <div class="col">
                         <h2>Стоимость для вас: {{fl.cost}}₽</h2>
