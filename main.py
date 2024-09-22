@@ -317,7 +317,7 @@ def card(path):
                             send_mail(
                                 "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
                                     0] + " on letting " + ul[
-                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
+                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path) + ". This email was sent automatically.",
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                         with open("tripsStatus.txt", 'w') as file:
@@ -446,7 +446,7 @@ def card(path):
                             send_mail(
                                 "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
                                     0] + " on letting " + ul[
-                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
+                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path) + ". This email was sent automatically.",
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                         with open("tripsStatus.txt", 'w') as file:
