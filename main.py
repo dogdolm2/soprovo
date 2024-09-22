@@ -28,7 +28,7 @@ def send_mail(code, to_addrs, from_addr):
     smtp.set_debuglevel(False)
     smtp.connect('mail.hosting.reg.ru', 587)
     smtp.ehlo()
-    smtp.login(from_addr, 'AntonVolky2009*')
+    smtp.login(from_addr, 'passw')
     smtp.sendmail(from_addr, to_addrs, msg)
     smtp.quit()
 
@@ -225,6 +225,7 @@ def index():
                                     break
                                 if start != -1 and tl[i1] != "********":
                                     desc.append(tl[i1])
+                            print(tl[end + 1])
                             fl.append({"location": tl[i + 1], "description": desc,
                                 "class": tl[end + 1], "count": tl[i],
                                 "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
@@ -284,7 +285,35 @@ def card(path):
                         v.seek(0)
                         vl = [line.strip() for line in v]
                         v.close()
-                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(tl[(path - 1) * 7 + 6]):
+                        t = open("trips.txt", "a+", encoding="utf8")
+                        t.seek(0)
+                        tl = [line.strip() for line in t]
+                        fl = dict()
+                        ts = open("tripsStatus.txt", "a+", encoding="utf8")
+                        ts.seek(0)
+                        tsl = [line.strip() for line in ts]
+                        print(tl[(path - 1) * 7])
+                        cur = 0
+                        for i in range(len(tl)):
+                            if tl[i] == str(path):
+                                cur = i
+                                break
+                        start = -1
+                        end = -1
+                        desc = list()
+                        for i in range(cur, len(tl)):
+                            if tl[i] == "********" and start == -1:
+                                start = i
+                            elif tl[i] == "********":
+                                end = i
+                                break
+                            if start != -1 and tl[i] != "********":
+                                desc.append(tl[i])
+                        if tl[cur] != "onReview":
+                            fl = {"location": tl[cur + 1], "description": desc,
+                                  "class": tl[end + 1], "count": tl[cur],
+                                  "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
+                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(fl["quant"]):
                             send_mail(
                                 "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
                                     0] + " on letting " + ul[
@@ -392,7 +421,28 @@ def card(path):
                         v.seek(0)
                         vl = [line.strip() for line in v]
                         v.close()
-                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(tl[(path - 1) * 7 + 6]):
+                        cur = 0
+                        for i in range(len(tl)):
+                            if tl[i] == str(path):
+                                cur = i
+                                break
+                        start = -1
+                        end = -1
+                        desc = list()
+                        fl = dict()
+                        for i in range(cur, len(tl)):
+                            if tl[i] == "********" and start == -1:
+                                start = i
+                            elif tl[i] == "********":
+                                end = i
+                                break
+                            if start != -1 and tl[i] != "********":
+                                desc.append(tl[i])
+                        if tl[cur] != "onReview":
+                            fl = {"location": tl[cur + 1], "description": desc,
+                                  "class": tl[end + 1], "count": tl[cur],
+                                  "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
+                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(fl["quant"]):
                             send_mail(
                                 "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
                                     0] + " on letting " + ul[
@@ -571,6 +621,18 @@ def register():
 @application.route('/style/<path:path>')
 def stylefiles(path):
     return flask.send_from_directory('style', path)
+
+
+@application.route('/clearcookie/')
+def clearcookie():
+    res = flask.redirect("/")
+    res.delete_cookie("key")
+    return res
+
+
+@application.route('/money/')
+def money():
+    return flask.render_template("money.html")
 
 
 @application.route('/verify/<path:path>/')
