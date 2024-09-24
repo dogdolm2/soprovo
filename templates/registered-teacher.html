@@ -51,6 +51,7 @@
             <div class="card-header text-bg-warning">
                 <div class="row">
                     <div class="col">
+                        {% if fsd[elem.count] == True %}<h3><span class="badge text-bg-success">Вы записаны</span></h3> {% endif %}
                         <h1><a href="/trip/{{elem.count}}/" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{elem.location}}</a></h1>
                     </div>
                     <div class="col"></div>

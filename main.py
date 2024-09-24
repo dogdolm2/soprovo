@@ -28,7 +28,7 @@ def send_mail(code, to_addrs, from_addr):
     smtp.set_debuglevel(False)
     smtp.connect('mail.hosting.reg.ru', 587)
     smtp.ehlo()
-    smtp.login(from_addr, 'passw')
+    smtp.login(from_addr, 'AntonVolky2009*')
     smtp.sendmail(from_addr, to_addrs, msg)
     smtp.quit()
 
@@ -225,7 +225,6 @@ def index():
                                     break
                                 if start != -1 and tl[i1] != "********":
                                     desc.append(tl[i1])
-                            print(tl[end + 1])
                             fl.append({"location": tl[i + 1], "description": desc,
                                 "class": tl[end + 1], "count": tl[i],
                                 "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
@@ -317,7 +316,7 @@ def card(path):
                             send_mail(
                                 "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
                                     0] + " on letting " + ul[
-                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path) + ". This email was sent automatically.",
+                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                         with open("tripsStatus.txt", 'w') as file:
@@ -446,7 +445,7 @@ def card(path):
                             send_mail(
                                 "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
                                     0] + " on letting " + ul[
-                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path) + ". This email was sent automatically.",
+                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                         with open("tripsStatus.txt", 'w') as file:
