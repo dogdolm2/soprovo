@@ -651,6 +651,9 @@ def verify(path):
         v.close()
         return 'Почта НЕ подтверждена! <a href="/">На главную</a>'
 
+@application.route('/contacts/')
+def contacts():
+    return flask.render_template("contacts.html")
 
 if __name__ == '__main__':
     application.run()
