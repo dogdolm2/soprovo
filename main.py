@@ -3,9 +3,12 @@ import hashlib
 import random
 import os
 import smtplib
+import documents
+import db_op
 
 application = flask.Flask("__name__")
-
+const_enter = """
+"""
 
 def check_mail(email, state):
     if state == "god":
@@ -21,7 +24,7 @@ def check_mail(email, state):
 
 
 def send_mail(code, to_addrs, from_addr):
-    lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
+    """lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
              code]
     msg = "\r\n".join(lines)
     smtp = smtplib.SMTP('mail.hosting.reg.ru', 587)
@@ -30,116 +33,52 @@ def send_mail(code, to_addrs, from_addr):
     smtp.ehlo()
     smtp.login(from_addr, 'AntonVolky2009*')
     smtp.sendmail(from_addr, to_addrs, msg)
-    smtp.quit()
+    smtp.quit()"""
 
 
 @application.route("/", methods=['POST', 'GET'])
 def index():
-    v = open("verified.txt", 'a+', encoding="utf-8")
-    v.seek(0)
-    vl = [line.strip() for line in v]
-    v.close()
     if flask.request.cookies.get("key") is None:
         return flask.render_template("index.html")
     else:
-        if flask.request.cookies.get("key") in vl:
+        print(flask.request.cookies.get("key"))
+        if db_op.check_whitelisting(flask.request.cookies.get("key")):
             if len(str(flask.request.cookies.get("key"))) == 47:
                 print("verified")
                 if flask.request.method == "POST":
                     print("entered post")
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
-                    '''print(flask.request.form.get("description"))
-                    for i in range(0, len(tl), 7):
-                        print("var", tl[i], "set to ---")
-                        if flask.request.form.get("var" + tl[i]) == "1":
-                            print("var", tl[i], "set to true")
-                            with open("tripsStatus.txt", 'r') as file:
-                                lines = file.readlines()
-                                file.close()
-                            print(lines)
-                            if str(flask.request.cookies.get("key")) not in lines[lines.index(str(tl[i]) + '\n') + 1]:
-                                lines[lines.index(str(tl[i]) + '\n') + 1] = str(lines[lines.index(tl[i] + '\n') + 1])[
-                                                                            :-1] + " " + str(
-                                    flask.request.cookies.get("key")) + "\n"
-                            with open("tripsStatus.txt", 'w') as file:
-                                file.writelines(lines)
-                                file.close()
-                        if flask.request.form.get("var" + tl[i]) is None and tl[i].isnumeric() is True:
-                            print("var", tl[i], "set to false")
-                            with open("tripsStatus.txt", 'r') as file:
-                                lines = file.readlines()
-                                file.close()
-                            print(lines[lines.index(str(tl[i]) + '\n') + 1])
-                            if str(flask.request.cookies.get("key")) in lines[lines.index(str(tl[i]) + '\n') + 1]:
-                                print("replace procedure initiated")
-                                lines[lines.index(str(tl[i]) + '\n') + 1] = lines[
-                                    lines.index(str(tl[i]) + '\n') + 1].replace(" " + str(flask.request.cookies.get("key")), '')
-                            with open("tripsStatus.txt", 'w') as file:
-                                file.writelines(lines)
-                                file.close()'''
                     if flask.request.form.get("description") != '':
-                        t.write("onReview" + '\n')
-                        t.write(flask.request.form.get("location") + '\n')
-                        t.write("********" + '\n')
-                        t.write(flask.request.form.get("description") + '\n')
-                        t.write("********" + '\n')
-                        t.write(flask.request.form.get("class") + '\n')
-                        t.write(flask.request.form.get("cost") + '\n')
-                        t.write('На проверке\n')
-                        t.write(flask.request.form.get("quant") + '\n')
-                        t.close()
-                        with open("tripsStatus.txt", 'a+', encoding="utf-8") as file:
-                            file.write("onReview\n")
-                            u = open("users.txt", "a+", encoding="utf8")
-                            u.seek(0)
-                            ul = [line.strip() for line in u]
-                            v = open("verified.txt", "a+", encoding="utf8")
-                            v.seek(0)
-                            vl = [line.strip() for line in v]
-                            file.write(ul[vl.index(flask.request.cookies.get("key"))] + " ")
-                            file.write(str(flask.request.cookies.get("key")) + "\n")
+                        id = db_op.add_trip(flask.request.form.get("location"), flask.request.form.get("description"),
+                                            flask.request.form.get("class"),
+                                            flask.request.form.get("cost"), "На проверке",
+                                            flask.request.form.get("quant"))
+                        db_op.add_participant(flask.request.cookies.get("key"), id)
                     return flask.redirect("/")
                 else:
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
+                    tl = db_op.read_trips()
                     fl = list()
-                    ts = open("tripsStatus.txt", "a+", encoding="utf8")
-                    ts.seek(0)
-                    tsl = [line.strip() for line in ts]
-                    i = 0
-                    print(tl)
-                    while i < len(tl):
-                        if tl[i] != "onReview":
-                            print(tl[i])
-                            start = -1
-                            end = -1
+                    for i in range(len(tl)):
+                        if tl[i][5] != "На проверке":
                             desc = list()
-                            for i1 in range(i, len(tl)):
-                                if tl[i1] == "********" and start == -1:
-                                    start = i1
-                                elif tl[i1] == "********":
-                                    end = i1
-                                    break
-                                if start != -1 and tl[i1] != "********":
-                                    desc.append(tl[i1])
-                            fl.append({"location": tl[i + 1], "description": desc,
-                                "class": tl[end + 1], "count": tl[i],
-                                "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
-                            i = end + 5
-                        else:
-                            i = len(tl)
+                            curline = ""
+                            for i1 in range(len(tl[i][2])):
+                                if tl[i][2][i1] != const_enter:
+                                    curline += str(tl[i][2][i1])
+                                else:
+                                    desc.append(curline)
+                                    curline = ""
+                            desc.append(curline)
+                            fl.append({"location": tl[i][1], "description": desc,
+                                "class": tl[i][3], "count": tl[i][0],
+                                "cost": 0, "state": tl[i][5], "quant": tl[i][6]})
                     key = flask.request.cookies.get("key")
                     fsd = {}
-                    for i in range(1, len(tsl), 2):
+                    tsl = db_op.get_trips_verifies()
+                    for i in range(len(tsl)):
                         if key in tsl[i]:
-                            fsd[tsl[i - 1]] = True
+                            fsd[i + 1] = True
                         else:
-                            fsd[tsl[i - 1]] = False
-                    t.close()
-                    ts.close()
+                            fsd[i + 1] = False
                     del key
                     print(fsd)
                     return flask.render_template("registered-teacher.html", fl=fl, fsd=fsd)
@@ -147,99 +86,38 @@ def index():
                 print("verified")
                 if flask.request.method == "POST":
                     print("entered post")
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
-                    '''print(flask.request.form.get("description"))
-                    for i in range(0, len(tl), 7):
-                        print("var", tl[i], "set to ---")
-                        if flask.request.form.get("var" + tl[i]) == "1":
-                            print("var", tl[i], "set to true")
-                            with open("tripsStatus.txt", 'r') as file:
-                                lines = file.readlines()
-                                file.close()
-                            print(lines)
-                            if str(flask.request.cookies.get("key")) not in lines[lines.index(str(tl[i]) + '\n') + 1]:
-                                lines[lines.index(str(tl[i]) + '\n') + 1] = str(lines[lines.index(tl[i] + '\n') + 1])[
-                                                                            :-1] + " " + str(
-                                    flask.request.cookies.get("key")) + "\n"
-                            with open("tripsStatus.txt", 'w') as file:
-                                file.writelines(lines)
-                                file.close()
-                        if flask.request.form.get("var" + tl[i]) is None and tl[i].isnumeric() is True:
-                            print("var", tl[i], "set to false")
-                            with open("tripsStatus.txt", 'r') as file:
-                                lines = file.readlines()
-                                file.close()
-                            print(lines[lines.index(str(tl[i]) + '\n') + 1])
-                            if str(flask.request.cookies.get("key")) in lines[lines.index(str(tl[i]) + '\n') + 1]:
-                                print("replace procedure initiated")
-                                lines[lines.index(str(tl[i]) + '\n') + 1] = lines[
-                                    lines.index(str(tl[i]) + '\n') + 1].replace(" " + str(flask.request.cookies.get("key")), '')
-                            with open("tripsStatus.txt", 'w') as file:
-                                file.writelines(lines)
-                                file.close()'''
                     if flask.request.form.get("description") != '':
-                        t.write("onReview" + '\n')
-                        t.write(flask.request.form.get("location") + '\n')
-                        t.write("********" + '\n')
-                        t.write(flask.request.form.get("description") + '\n')
-                        t.write("********" + '\n')
-                        t.write(flask.request.form.get("class") + '\n')
-                        t.write(flask.request.form.get("cost") + '\n')
-                        t.write('На проверке\n')
-                        t.write(flask.request.form.get("quant") + '\n')
-                        t.close()
-                        with open("tripsStatus.txt", 'a+', encoding="utf-8") as file:
-                            file.write("onReview\n")
-                            u = open("users.txt", "a+", encoding="utf8")
-                            u.seek(0)
-                            ul = [line.strip() for line in u]
-                            v = open("verified.txt", "a+", encoding="utf8")
-                            v.seek(0)
-                            vl = [line.strip() for line in v]
-                            file.write(ul[vl.index(flask.request.cookies.get("key"))] + " ")
-                            file.write(str(flask.request.cookies.get("key")) + "\n")
+                        id = db_op.add_trip(flask.request.form.get("location"), flask.request.form.get("description"),
+                                            flask.request.form.get("class"),
+                                            flask.request.form.get("cost"), "На проверке",
+                                            flask.request.form.get("quant"))
+                        db_op.add_participant(flask.request.cookies.get("key"), id)
                     return flask.redirect("/")
                 else:
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
+                    tl = db_op.read_trips()
                     fl = list()
-                    ts = open("tripsStatus.txt", "a+", encoding="utf8")
-                    ts.seek(0)
-                    tsl = [line.strip() for line in ts]
-                    i = 0
-                    print(tl)
-                    while i < len(tl):
-                        if tl[i] != "onReview":
-                            print(tl[i])
-                            start = -1
-                            end = -1
+                    for i in range(len(tl)):
+                        if tl[i][5] != "На проверке":
                             desc = list()
-                            for i1 in range(i, len(tl)):
-                                if tl[i1] == "********" and start == -1:
-                                    start = i1
-                                elif tl[i1] == "********":
-                                    end = i1
-                                    break
-                                if start != -1 and tl[i1] != "********":
-                                    desc.append(tl[i1])
-                            fl.append({"location": tl[i + 1], "description": desc,
-                                "class": tl[end + 1], "count": tl[i],
-                                "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])})
-                            i = end + 5
-                        else:
-                            i = len(tl)
+                            curline = ""
+                            for i1 in range(len(tl[i][2])):
+                                if tl[i][2][i1] != const_enter:
+                                    curline += str(tl[i][2][i1])
+                                else:
+                                    desc.append(curline)
+                                    curline = ""
+                            desc.append(curline)
+                            fl.append({"location": tl[i][1], "description": desc,
+                                       "class": tl[i][3], "count": tl[i][0],
+                                       "cost": tl[i][4], "state": tl[i][5], "quant": tl[i][6]})
                     key = flask.request.cookies.get("key")
                     fsd = {}
-                    for i in range(1, len(tsl), 2):
+                    tsl = db_op.get_trips_verifies()
+                    for i in range(len(tsl)):
                         if key in tsl[i]:
-                            fsd[tsl[i - 1]] = True
+                            fsd[i + 1] = True
                         else:
-                            fsd[tsl[i - 1]] = False
-                    t.close()
-                    ts.close()
+                            fsd[i + 1] = False
                     del key
                     print(fsd)
                     return flask.render_template("registered.html", fl=fl, fsd=fsd)
@@ -249,148 +127,73 @@ def index():
 
 @application.route("/trip/<path:path>/", methods=['POST', 'GET'])
 def card(path):
-    path = int(path)
-    v = open("verified.txt", 'a+', encoding="utf-8")
-    v.seek(0)
-    vl = [line.strip() for line in v]
-    v.close()
     if flask.request.cookies.get("key") is None:
         return flask.render_template("index.html")
     else:
-        if flask.request.cookies.get("key") in vl:
+        if db_op.check_whitelisting(flask.request.cookies.get("key")):
             if len(str(flask.request.cookies.get("key"))) == 47:
                 print("verified")
                 if flask.request.method == "POST":
                     print("entered post")
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
-                    print("var", str(path), "set to ---")
                     if flask.request.form.get("var" + str(path)) == "1":
                         print("var", str(path), "set to true")
-                        with open("tripsStatus.txt", 'r') as file:
-                            lines = file.readlines()
-                            file.close()
-                        print(lines)
-                        if str(flask.request.cookies.get("key")) not in lines[lines.index(str(path) + '\n') + 1]:
-                            lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
-                                                                       :-1] + " " + str(
-                                flask.request.cookies.get("key")) + "\n"
-                        u = open("users.txt", "a+", encoding="utf8")
-                        u.seek(0)
-                        ul = [line.strip() for line in u]
-                        u.close()
-                        v = open("verified.txt", "a+", encoding="utf8")
-                        v.seek(0)
-                        vl = [line.strip() for line in v]
-                        v.close()
-                        t = open("trips.txt", "a+", encoding="utf8")
-                        t.seek(0)
-                        tl = [line.strip() for line in t]
-                        fl = dict()
-                        ts = open("tripsStatus.txt", "a+", encoding="utf8")
-                        ts.seek(0)
-                        tsl = [line.strip() for line in ts]
-                        print(tl[(path - 1) * 7])
-                        cur = 0
-                        for i in range(len(tl)):
-                            if tl[i] == str(path):
-                                cur = i
-                                break
-                        start = -1
-                        end = -1
+                        if str(flask.request.cookies.get("key")) not in db_op.read_trip_participants(path):
+                            db_op.add_participant(flask.request.cookies.get("key"), path)
+                        tl = db_op.read_trips()[int(path) - 1]
                         desc = list()
-                        for i in range(cur, len(tl)):
-                            if tl[i] == "********" and start == -1:
-                                start = i
-                            elif tl[i] == "********":
-                                end = i
-                                break
-                            if start != -1 and tl[i] != "********":
-                                desc.append(tl[i])
-                        if tl[cur] != "onReview":
-                            fl = {"location": tl[cur + 1], "description": desc,
-                                  "class": tl[end + 1], "count": tl[cur],
-                                  "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
-                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(fl["quant"]):
+                        curline = ""
+                        for i1 in range(len(tl[2])):
+                            if tl[2][i1] != const_enter:
+                                curline += tl[2][i1]
+                            else:
+                                desc.append(curline)
+                                curline = ""
+                        desc.append(curline)
+                        fl = {"location": tl[1], "description": desc,
+                                    "class": tl[3], "count": tl[0],
+                                    "cost": 0, "state": tl[5], "quant": tl[6]}
+                        if len(db_op.read_trip_participants(path)) > int(tl[6]):
                             send_mail(
-                                "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
-                                    0] + " on letting " + ul[
-                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
+                                "You need to reach agreement with " + db_op.read_trip_participants(path)[0] + " on letting " +
+                                db_op.read_trip_participants(path)[len(db_op.read_trip_participants(path)) - 1] + " join trip #" + str(path),
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
-                        with open("tripsStatus.txt", 'w') as file:
-                            file.writelines(lines)
-                            file.close()
                     if flask.request.form.get("var" + str(path)) is None and str(path).isnumeric() is True:
                         print("var", str(path), "set to false")
-                        with open("tripsStatus.txt", 'r') as file:
-                            lines = file.readlines()
-                            file.close()
-                        print(lines[lines.index(str(path) + '\n') + 1])
-                        if str(flask.request.cookies.get("key")) in lines[lines.index(str(path) + '\n') + 1]:
-                            print("replace procedure initiated")
-                            lines[lines.index(str(path) + '\n') + 1] = lines[lines.index(str(path) + '\n') + 1].replace(" " +
-                                str(flask.request.cookies.get("key")), '')
-                        with open("tripsStatus.txt", 'w') as file:
-                            file.writelines(lines)
-                            file.close()
+                        db_op.delete_participant(flask.request.cookies.get("key"), path)
                     return flask.redirect(f"/trip/{path}/")
                 else:
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
-                    fl = dict()
-                    ts = open("tripsStatus.txt", "a+", encoding="utf8")
-                    ts.seek(0)
-                    tsl = [line.strip() for line in ts]
-                    print(tl[(path - 1) * 7])
-                    cur = 0
-                    for i in range(len(tl)):
-                        if tl[i] == str(path):
-                            cur = i
-                            break
-                    start = -1
-                    end = -1
+                    tsl = db_op.read_trip_participants(path)
+                    tl = db_op.read_trips()[int(path) - 1]
                     desc = list()
-                    for i in range(cur, len(tl)):
-                        if tl[i] == "********" and start == -1:
-                            start = i
-                        elif tl[i] == "********":
-                            end = i
-                            break
-                        if start != -1 and tl[i] != "********":
-                            desc.append(tl[i])
-                    if tl[cur] != "onReview":
-                        fl = {"location": tl[cur + 1], "description": desc,
-                              "class": tl[end + 1], "count": tl[cur],
-                              "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
-                        lcodes = tsl[tsl.index(str(path)) + 1].split()
-                        l = list()
-                        n = open("names.txt", "a+", encoding="utf8")
-                        n.seek(0)
-                        nl = [line.strip() for line in n]
-                        v = open("verified.txt", "a+", encoding="utf8")
-                        v.seek(0)
-                        vl = [line.strip() for line in v]
-                        print(vl)
-                        actual_quant = len(lcodes) - 1
-                        if int(fl["quant"]) <= actual_quant:
-                            fl["state"] = "Участники набраны"
-                        for i in range(1, len(lcodes)):
-                            l.append(nl[vl.index(lcodes[i])].replace("_", " "))
-                            if len(lcodes[i]) == 47:
-                                l[-1] += " - сопровождающий"
+                    curline = ""
+                    for i1 in range(len(tl[2])):
+                        if tl[2][i1] != const_enter:
+                            curline += tl[2][i1]
+                        else:
+                            desc.append(curline)
+                            curline = ""
+                    desc.append(curline)
+                    fl = {"location": tl[1], "description": desc,
+                          "class": tl[3], "count": tl[0],
+                          "cost": 0, "state": tl[5], "quant": int(tl[6])}
+                    lcodes = db_op.read_trip_participants(path)
+                    l = list()
+                    actual_quant = len(lcodes) - 1
+                    if int(fl["quant"]) <= actual_quant:
+                        fl["state"] = "Участники набраны"
+                    for i in range(len(lcodes)):
+                        cur_user = db_op.get_user_data(verify_number=lcodes[i])
+                        l.append(str(cur_user[5] + " " + cur_user[6] + " " + cur_user[7]))
+                        if len(lcodes[i]) == 47:
+                            l[-1] += " - сопровождающий"
                     key = flask.request.cookies.get("key")
                     fsd = {}
-                    for i in range(1, len(tsl), 2):
-                        if key in tsl[i]:
-                            fsd[tsl[i - 1]] = True
+                    for i in range(len(tsl)):
+                        if key == tsl[i]:
+                            fsd[path] = True
                         else:
-                            fsd[tsl[i - 1]] = False
-                    t.close()
-                    ts.close()
-                    n.close()
+                            fsd[path] = False
                     del key
                     print(fsd)
                     return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l, ac=actual_quant)
@@ -398,128 +201,67 @@ def card(path):
                 print("verified")
                 if flask.request.method == "POST":
                     print("entered post")
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
-                    print("var", str(path), "set to ---")
                     if flask.request.form.get("var" + str(path)) == "1":
                         print("var", str(path), "set to true")
-                        with open("tripsStatus.txt", 'r') as file:
-                            lines = file.readlines()
-                            file.close()
-                        print(lines)
-                        if str(flask.request.cookies.get("key")) not in lines[lines.index(str(path) + '\n') + 1]:
-                            lines[lines.index(str(path) + '\n') + 1] = str(lines[lines.index(str(path) + '\n') + 1])[
-                                                                       :-1] + " " + str(
-                                flask.request.cookies.get("key")) + "\n"
-                        u = open("users.txt", "a+", encoding="utf8")
-                        u.seek(0)
-                        ul = [line.strip() for line in u]
-                        u.close()
-                        v = open("verified.txt", "a+", encoding="utf8")
-                        v.seek(0)
-                        vl = [line.strip() for line in v]
-                        v.close()
-                        cur = 0
-                        for i in range(len(tl)):
-                            if tl[i] == str(path):
-                                cur = i
-                                break
-                        start = -1
-                        end = -1
+                        if str(flask.request.cookies.get("key")) not in db_op.read_trip_participants(path):
+                            db_op.add_participant(flask.request.cookies.get("key"), path)
+                        tl = db_op.read_trips()[int(path) - 1]
                         desc = list()
-                        fl = dict()
-                        for i in range(cur, len(tl)):
-                            if tl[i] == "********" and start == -1:
-                                start = i
-                            elif tl[i] == "********":
-                                end = i
-                                break
-                            if start != -1 and tl[i] != "********":
-                                desc.append(tl[i])
-                        if tl[cur] != "onReview":
-                            fl = {"location": tl[cur + 1], "description": desc,
-                                  "class": tl[end + 1], "count": tl[cur],
-                                  "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
-                        if len(lines[lines.index(str(path) + '\n') + 1].split()) - 1 > int(fl["quant"]):
+                        curline = ""
+                        for i1 in range(len(tl[2])):
+                            if tl[2][i1] != const_enter:
+                                curline += tl[2][i1]
+                            else:
+                                desc.append(curline)
+                                curline = ""
+                        desc.append(curline)
+                        fl = {"location": tl[1], "description": desc,
+                              "class": tl[3], "count": tl[0],
+                              "cost": tl[4], "state": tl[5], "quant": tl[6]}
+                        if len(db_op.read_trip_participants(path)) > int(tl[6]):
                             send_mail(
-                                "You need to reach agreement with " + lines[lines.index(str(path) + '\n') + 1].split()[
-                                    0] + " on letting " + ul[
-                                    vl.index(flask.request.cookies.get("key"))] + " join trip #" + str(path),
+                                "You need to reach agreement with " + db_op.read_trip_participants(path)[
+                                    0] + " on letting " +
+                                db_op.read_trip_participants(path)[
+                                    len(db_op.read_trip_participants(path)) - 1] + " join trip #" + str(path),
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
-                        with open("tripsStatus.txt", 'w') as file:
-                            file.writelines(lines)
-                            file.close()
                     if flask.request.form.get("var" + str(path)) is None and str(path).isnumeric() is True:
-                        print("var", path, "set to false")
-                        with open("tripsStatus.txt", 'r') as file:
-                            lines = file.readlines()
-                            file.close()
-                        print(lines[lines.index(str(path) + '\n') + 1])
-                        if str(flask.request.cookies.get("key")) in lines[lines.index(str(path) + '\n') + 1]:
-                            print("replace procedure initiated")
-                            lines[lines.index(str(path) + '\n') + 1] = lines[lines.index(str(path) + '\n') + 1].replace(" " +
-                                str(flask.request.cookies.get("key")), '')
-                        with open("tripsStatus.txt", 'w') as file:
-                            file.writelines(lines)
-                            file.close()
+                        print("var", str(path), "set to false")
+                        db_op.delete_participant(flask.request.cookies.get("key"), path)
                     return flask.redirect(f"/trip/{path}/")
                 else:
-                    t = open("trips.txt", "a+", encoding="utf8")
-                    t.seek(0)
-                    tl = [line.strip() for line in t]
-                    fl = dict()
-                    ts = open("tripsStatus.txt", "a+", encoding="utf8")
-                    ts.seek(0)
-                    tsl = [line.strip() for line in ts]
-                    print(tl[(path - 1) * 7])
-                    cur = 0
-                    for i in range(len(tl)):
-                        if tl[i] == str(path):
-                            cur = i
-                            break
-                    start = -1
-                    end = -1
+                    tsl = db_op.read_trip_participants(path)
+                    tl = db_op.read_trips()[int(path) - 1]
                     desc = list()
-                    for i in range(cur, len(tl)):
-                        if tl[i] == "********" and start == -1:
-                            start = i
-                        elif tl[i] == "********":
-                            end = i
-                            break
-                        if start != -1 and tl[i] != "********":
-                            desc.append(tl[i])
-                    if tl[cur] != "onReview":
-                        fl = {"location": tl[cur + 1], "description": desc,
-                              "class": tl[end + 1], "count": tl[cur],
-                              "cost": tl[end + 2], "state": tl[end + 3], "quant": int(tl[end + 4])}
-                        lcodes = tsl[tsl.index(str(path)) + 1].split()
-                        l = list()
-                        n = open("names.txt", "a+", encoding="utf8")
-                        n.seek(0)
-                        nl = [line.strip() for line in n]
-                        v = open("verified.txt", "a+", encoding="utf8")
-                        v.seek(0)
-                        vl = [line.strip() for line in v]
-                        print(vl)
-                        actual_quant = len(lcodes) - 1
-                        if int(fl["quant"]) <= actual_quant:
-                            fl["state"] = "Участники набраны"
-                        for i in range(1, len(lcodes)):
-                            l.append(nl[vl.index(lcodes[i])].replace("_", " "))
-                            if len(lcodes[i]) == 47:
-                                l[-1] += " - сопровождающий"
+                    curline = ""
+                    for i1 in range(len(tl[2])):
+                        if tl[2][i1] != const_enter:
+                            curline += tl[2][i1]
+                        else:
+                            desc.append(curline)
+                            curline = ""
+                    desc.append(curline)
+                    fl = {"location": tl[1], "description": desc,
+                          "class": tl[3], "count": tl[0],
+                          "cost": tl[4], "state": tl[5], "quant": int(tl[6])}
+                    lcodes = db_op.read_trip_participants(path)
+                    l = list()
+                    actual_quant = len(lcodes) - 1
+                    if int(fl["quant"]) <= actual_quant:
+                        fl["state"] = "Участники набраны"
+                    for i in range(len(lcodes)):
+                        cur_user = db_op.get_user_data(verify_number=lcodes[i])
+                        l.append(str(cur_user[5] + " " + cur_user[6] + " " + cur_user[7]))
+                        if len(lcodes[i]) == 47:
+                            l[-1] += " - сопровождающий"
                     key = flask.request.cookies.get("key")
                     fsd = {}
-                    for i in range(1, len(tsl), 2):
-                        if key in tsl[i]:
-                            fsd[tsl[i - 1]] = True
+                    for i in range(len(tsl)):
+                        if key == tsl[i]:
+                            fsd[path] = True
                         else:
-                            fsd[tsl[i - 1]] = False
-                    t.close()
-                    ts.close()
-                    n.close()
+                            fsd[path] = False
                     del key
                     print(fsd)
                     return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l, ac=actual_quant)
@@ -530,45 +272,24 @@ def card(path):
 @application.route("/login/", methods=["POST", "GET"])
 def login():
     if flask.request.method == "POST":
-        p = open("passwds.txt", 'a+', encoding="utf-8")
-        p.seek(0)
-        pl = [line.strip() for line in p]
-        u = open("users.txt", 'a+', encoding="utf-8")
-        u.seek(0)
-        ul = [line.strip() for line in u]
-        v = open("verified.txt", 'a+', encoding="utf-8")
-        v.seek(0)
-        vl = [line.strip() for line in v]
-        w = open("whitelisted.txt", 'a+', encoding="utf-8")
-        w.seek(0)
-        wl = [line.strip() for line in w]
+        fulll = db_op.read_users()
+        ul = list()
+        pl = list()
+        for i in range(len(fulll)):
+            ul.append(fulll[i][2])
+            pl.append(fulll[i][3])
+        print(pl, ul)
         if flask.request.form.get("email") in ul:
             md5_hashl = hashlib.new('md5')
             md5_hashl.update(flask.request.form.get("passw").encode())
             print(md5_hashl.hexdigest())
-            print(pl[ul.index(flask.request.form.get("email"))])
-            print(wl)
-            print(str(vl[ul.index(flask.request.form.get("email"))]))
-            if md5_hashl.hexdigest() == pl[ul.index(flask.request.form.get("email"))] and str(
-                    vl[ul.index(flask.request.form.get("email"))]) in wl:
+            if md5_hashl.hexdigest() == pl[ul.index(flask.request.form.get("email"))] and db_op.check_whitelisting(fulll[ul.index(flask.request.form.get("email"))][1]):
                 res = flask.redirect("/")
-                res.set_cookie("key", str(vl[ul.index(flask.request.form.get("email"))]), 60 * 60 * 24 * 365 * 5)
-                p.close()
-                u.close()
-                v.close()
-                w.close()
+                res.set_cookie("key", str(fulll[ul.index(flask.request.form.get("email"))][1]), 60 * 60 * 24 * 365 * 5)
                 return res
             else:
-                p.close()
-                u.close()
-                v.close()
-                w.close()
                 return flask.render_template("index.html", show={"show": 1})
         else:
-            p.close()
-            u.close()
-            v.close()
-            w.close()
             return flask.render_template("login.html")
     else:
         return flask.render_template("login.html")
@@ -577,14 +298,14 @@ def login():
 @application.route("/reg/", methods=["POST", "GET"])
 def register():
     if flask.request.method == "POST":
-        p = open("passwds.txt", 'a+', encoding="utf-8")
-        u = open("users.txt", 'a+', encoding="utf-8")
-        u.seek(0)
-        ul = [line.strip() for line in u]
-        v = open("verified.txt", 'a+', encoding="utf-8")
-        n = open("names.txt", 'a+', encoding="utf-8")
         if check_mail(flask.request.form.get("email"), flask.request.form.get("options")) and flask.request.form.get(
                 "passw") == flask.request.form.get("passwrep"):
+            fulll = db_op.read_users()
+            ul = list()
+            pl = list()
+            for i in range(len(fulll)):
+                ul.append(fulll[i][2])
+                pl.append(fulll[i][3])
             if flask.request.form.get("email") in ul:
                 return flask.render_template("register.html")
             if flask.request.form.get("options") == "god":
@@ -592,26 +313,14 @@ def register():
                                                 99999999999999999999999999999999999999999999999))
             else:
                 verifylink = str(random.randint(100000000, 1000000000000000000000000000000000000000000000))
-            send_mail("Your verification code link is https://xn--80adghmg3aabhlj7izc.xn--p1ai/verify/" + str(verifylink), flask.request.form.get("email"), "noreply@xn--80adghmg3aabhlj7izc.xn--p1ai")
+            send_mail("Your verification code link is https://xn--80adghmg3aabhlj7izc.xn--p1ai/verify/" + str(verifylink), flask.request.form.get("email"), "noreply@xn--80adghmg3aabhlj7izc.xn--p1ai") # temp bypassed in function
             md5_hashl = hashlib.new('md5')
             md5_hashl.update(verifylink.encode())
             md5_hashp = hashlib.new('md5')
             md5_hashp.update(flask.request.form.get("passw").encode())
-            p.write(str(md5_hashp.hexdigest()) + '\n')
-            u.write(str(flask.request.form.get("email") + '\n'))
-            v.write(verifylink + '\n')
-            n.write(str(flask.request.form.get("FIO1")) + "_" + str(flask.request.form.get("FIO2")) + "_" + str(
-                flask.request.form.get("FIO3")) + '\n')
-            n.close()
-            v.close()
-            u.close()
-            p.close()
+            db_op.add_user(flask.request.form.get("email"), flask.request.form.get("FIO1"), flask.request.form.get("FIO2"), flask.request.form.get("FIO3"), md5_hashp.hexdigest(), verifylink)
             return flask.render_template("index.html", show={"show": 1})
         else:
-            n.close()
-            v.close()
-            u.close()
-            p.close()
             return flask.render_template("register.html")
     else:
         return flask.render_template("register.html")
@@ -636,24 +345,44 @@ def money():
 
 @application.route('/verify/<path:path>/')
 def verify(path):
-    v = open("verified.txt", 'a+', encoding="utf-8")
-    v.seek(0)
-    vl = [line.strip() for line in v]
+    vl = db_op.read_users_verify_number()
     if str(path) in vl:
         res = flask.redirect("/")
         res.set_cookie("key", str(path), 60 * 60 * 24 * 365 * 5)
-        w = open("whitelisted.txt", 'a+', encoding="utf-8")
-        w.write(str(path) + '\n')
-        w.close()
-        v.close()
+        db_op.check_whitelisting(path)
         return res
     else:
-        v.close()
         return 'Почта НЕ подтверждена! <a href="/">На главную</a>'
 
 @application.route('/contacts/')
 def contacts():
     return flask.render_template("contacts.html")
+
+@application.route('/documents/<path:path>/')
+def document_files(path):
+    lcodes = db_op.read_trip_participants(path)
+    tempf = open("temp.txt", "w", encoding="utf-8")
+    wl = ["Фамилия,Имя,Отчество,Электронная Почта,\n"]
+    for i in range(len(lcodes)):
+        curuser = db_op.get_user_data(verify_number=lcodes[i])
+        wl.append(curuser[5] + "," + curuser[6] + "," + curuser[7] + "," + curuser[2] + "\n")
+    tempf.writelines(wl)
+    tempf.close()
+    documents.generateSpravka(len(wl) - 1, path)
+    return flask.send_file("output.pdf")
+
+@application.route('/raw/<path:path>/')
+def raw_files(path):
+    lcodes = db_op.read_trip_participants(path)
+    tempf = open("output.csv", "w", encoding="utf-8")
+    wl = ["Фамилия,Имя,Отчество,Электронная Почта,\n"]
+    for i in range(len(lcodes)):
+        curuser = db_op.get_user_data(verify_number=lcodes[i])
+        wl.append(curuser[5] + "," + curuser[6] + "," + curuser[7] + "," + curuser[2] + "\n")
+    tempf.writelines(wl)
+    tempf.close()
+    return flask.send_file("output.csv", as_attachment=True)
+
 
 if __name__ == '__main__':
     application.run()

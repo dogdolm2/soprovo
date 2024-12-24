@@ -81,9 +81,6 @@
 	</div>
 </form>
 <div class="container">
-    <div align="center"><a href="/documents/{{path}}" class="btn btn-ouline-secondary" target="_blank">Сгенерировать справку об участниках по форме №027С</a></div>
-    <br>
-    <br>
     <br>
     <h4 class="thin">Максимум {{fl.quant}} мест</h4>
     <p>Если вы хотите поехать, но места закончились, все равно записывайтесь и мы попробуем договориться с организатором</p>
@@ -100,6 +97,15 @@
             <br>
         {% endfor %}
     </div>
+    <br>
+    {% if fl.cost == 0 %}
+        <div><a href="/documents/{{path}}" class="btn btn-secondary" target="_blank">Сгенерировать справку об участниках по форме №027С</a></div>
+        <br>
+        <br>
+        <div><a href="/raw/{{path}}" class="btn btn-secondary" target="_blank">Сгенерировать таблицу участников .csv</a></div>
+        <br>
+        <br>
+    {% endif %}
 </div>
 <br>
 <br>
