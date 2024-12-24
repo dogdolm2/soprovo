@@ -70,7 +70,7 @@ def index():
                             desc.append(curline)
                             fl.append({"location": tl[i][1], "description": desc,
                                 "class": tl[i][3], "count": tl[i][0],
-                                "cost": tl[i][4], "state": tl[i][5], "quant": tl[i][6]})
+                                "cost": 0, "state": tl[i][5], "quant": tl[i][6]})
                     key = flask.request.cookies.get("key")
                     fsd = {}
                     tsl = db_op.get_trips_verifies()
@@ -139,7 +139,7 @@ def card(path):
                         print("var", str(path), "set to true")
                         if str(flask.request.cookies.get("key")) not in db_op.read_trip_participants(path):
                             db_op.add_participant(flask.request.cookies.get("key"), path)
-                        tl = db_op.read_trips()[path + 1]
+                        tl = db_op.read_trips()[int(path) - 1]
                         desc = list()
                         curline = ""
                         for i1 in range(len(tl[2])):
@@ -152,7 +152,7 @@ def card(path):
                         fl = {"location": tl[1], "description": desc,
                                     "class": tl[3], "count": tl[0],
                                     "cost": 0, "state": tl[5], "quant": tl[6]}
-                        if len(db_op.read_trip_participants(path)) > tl[6]:
+                        if len(db_op.read_trip_participants(path)) > int(tl[6]):
                             send_mail(
                                 "You need to reach agreement with " + db_op.read_trip_participants(path)[0] + " on letting " +
                                 db_op.read_trip_participants(path)[len(db_op.read_trip_participants(path)) - 1] + " join trip #" + str(path),
@@ -164,19 +164,19 @@ def card(path):
                     return flask.redirect(f"/trip/{path}/")
                 else:
                     tsl = db_op.read_trip_participants(path)
-                    tl = db_op.read_trips()[path + 1]
+                    tl = db_op.read_trips()[int(path) - 1]
                     desc = list()
                     curline = ""
                     for i1 in range(len(tl[2])):
-                        if tl[i1] != const_enter:
-                            curline += tl[i1]
+                        if tl[2][i1] != const_enter:
+                            curline += tl[2][i1]
                         else:
                             desc.append(curline)
                             curline = ""
                     desc.append(curline)
                     fl = {"location": tl[1], "description": desc,
                           "class": tl[3], "count": tl[0],
-                          "cost": tl[4], "state": tl[5], "quant": tl[6]}
+                          "cost": 0, "state": tl[5], "quant": int(tl[6])}
                     lcodes = db_op.read_trip_participants(path)
                     l = list()
                     actual_quant = len(lcodes) - 1
@@ -304,8 +304,8 @@ def register():
             ul = list()
             pl = list()
             for i in range(len(fulll)):
-                ul.append(fulll[2])
-                pl.append(fulll[3])
+                ul.append(fulll[i][2])
+                pl.append(fulll[i][3])
             if flask.request.form.get("email") in ul:
                 return flask.render_template("register.html")
             if flask.request.form.get("options") == "god":
@@ -370,6 +370,18 @@ def document_files(path):
     tempf.close()
     documents.generateSpravka(len(wl) - 1, path)
     return flask.send_file("output.pdf")
+
+@application.route('/raw/<path:path>/')
+def raw_files(path):
+    lcodes = db_op.read_trip_participants(path)
+    tempf = open("output.csv", "w", encoding="utf-8")
+    wl = ["Фамилия,Имя,Отчество,Электронная Почта,\n"]
+    for i in range(len(lcodes)):
+        curuser = db_op.get_user_data(verify_number=lcodes[i])
+        wl.append(curuser[5] + "," + curuser[6] + "," + curuser[7] + "," + curuser[2] + "\n")
+    tempf.writelines(wl)
+    tempf.close()
+    return flask.send_file("output.csv", as_attachment=True)
 
 
 if __name__ == '__main__':
