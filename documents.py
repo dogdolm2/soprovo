@@ -38,7 +38,7 @@ def load_data_from_csv(csv_filepath):
 def generateSpravka(count, id, filename="temp.txt"):
     col_names, data = load_data_from_csv(filename)
     pdf = PDF()
-    pdf.add_font('DejaVu', fname='font/moscowsansregular.ttf')
+    pdf.add_font('DejaVu', fname='style/moscowsansregular.ttf')
     pdf.set_font('DejaVu', size=11)
     pdf.add_page()
     current_time = datetime.datetime.now()
