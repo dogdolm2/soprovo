@@ -133,3 +133,10 @@ def get_trips_verifies():
     for i in range(len(l)):
         res.append(l[i][7])
     return res
+
+def update_state(id, new_state):
+    connection = sqlite3.connect('trips.db')
+    cursor = connection.cursor()
+    cursor.execute('UPDATE Trips SET state = ? WHERE id = ?', (new_state, id,))
+    connection.commit()
+    connection.close()

@@ -5,6 +5,7 @@ import os
 import smtplib
 import documents
 import db_op
+from db_op import read_trips
 
 application = flask.Flask("__name__")
 const_enter = """
@@ -34,6 +35,53 @@ def send_mail(code, to_addrs, from_addr):
     smtp.login(from_addr, 'AntonVolky2009*')
     smtp.sendmail(from_addr, to_addrs, msg)
     smtp.quit()"""
+
+
+@application.route("/admin/", methods=['POST', 'GET'])
+def admin():
+    if flask.request.cookies.get("key") == "258004691558600667130842554304901163225639372" or \
+        flask.request.cookies.get("key") == "58341574981824171660262120297766530067860640204":
+        if flask.request.method == "POST":
+            print("entered post")
+            l = read_trips()
+            for i in range(1, len(l) + 1):
+                print(l[i - 1][5], flask.request.form.get("state" + str(i)))
+                if l[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get("state" + str(i)) is not None:
+                    db_op.update_state(i, flask.request.form.get("state" + str(i)))
+            if flask.request.form.get("description") != '':
+                id = db_op.add_trip(flask.request.form.get("location"), flask.request.form.get("description"),
+                                    flask.request.form.get("class"),
+                                    flask.request.form.get("cost"), "На проверке",
+                                    flask.request.form.get("quant"))
+                db_op.add_participant(flask.request.cookies.get("key"), id)
+            return flask.redirect("/admin/")
+        else:
+            tl = db_op.read_trips()
+            fl = list()
+            for i in range(len(tl)):
+                desc = list()
+                curline = ""
+                for i1 in range(len(tl[i][2])):
+                    if tl[i][2][i1] != const_enter:
+                        curline += str(tl[i][2][i1])
+                    else:
+                        desc.append(curline)
+                        curline = ""
+                desc.append(curline)
+                fl.append({"location": tl[i][1], "description": desc,
+                    "class": tl[i][3], "count": tl[i][0],
+                    "cost": tl[i][4], "state": tl[i][5], "quant": tl[i][6]})
+            key = flask.request.cookies.get("key")
+            fsd = {}
+            tsl = db_op.get_trips_verifies()
+            for i in range(len(tsl)):
+                if key in tsl[i]:
+                    fsd[i + 1] = True
+                else:
+                    fsd[i + 1] = False
+            del key
+            print(fsd)
+            return flask.render_template("admin.html", fl=fl, fsd=fsd)
 
 
 @application.route("/", methods=['POST', 'GET'])
@@ -328,7 +376,7 @@ def register():
 
 @application.route('/style/<path:path>')
 def stylefiles(path):
-    return flask.send_from_directory('style', path)
+    return flask.send_from_directory('../../soprovo-experimental/soprovo-experimental/style', path)
 
 
 @application.route('/clearcookie/')
