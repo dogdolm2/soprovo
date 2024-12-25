@@ -44,7 +44,7 @@
     </div>
 </div>
 <br>
-<form method="post" action="/">
+<form method="post" action="/admin/">
 <div class="container">
     <br>
     {% for elem in fl %}
@@ -54,19 +54,18 @@
                     <div class="col"></div>
                     <div class="col"></div>
                     <div class="col">
-                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Сменить статус поездки
-                        </a>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item {% if elem.state == 'На проверке' %} disabled {% endif %}" href="/change/{{elem.count}}/1">На проверке</a></li>
-                          <li><a class="dropdown-item {% if elem.state == 'Набор участников' %} disabled {% endif %}" href="/change/{{elem.count}}/2">Набор участников</a></li>
-                          <li><a class="dropdown-item {% if elem.state == 'Согласование' %} disabled {% endif %}" href="/change/{{elem.count}}/3">Согласование</a></li>
-                          <li><a class="dropdown-item {% if elem.state == 'Согласовано' %} disabled {% endif %}" href="/change/{{elem.count}}/4">Согласовано</a></li>
-                        </ul>
+                        <div align="right" class="dropdown">
+                            <label for="choice{{elem.count}}">Сменить статус:</label>
+                            <select name="state{{elem.count}}" id="choice{{elem.count}}">
+                              <option value="На проверке"{% if elem.state == 'На проверке' %} disabled selected="selected"{% endif %}>На проверке</option>
+                              <option value="Набор участников"{% if elem.state == 'Набор участников' %} disabled selected="selected"{% endif %}>Набор участников</option>
+                              <option value="Отменено"{% if elem.state == 'Отменено' %} disabled selected="selected"{% endif %}>Отменено</option>
+                              <option value="Согласованно"{% if elem.state == 'Согласованно' %} disabled selected="selected"{% endif %}>Согласованно</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <br><br>
-                </div>
                 <div class="row">
                     <div class="col">
                         {% if fsd[elem.count] == True %}<h3><span class="badge text-bg-success">Вы записаны</span></h3> {% endif %}
@@ -98,6 +97,13 @@
         <br>
         <br>
     {% endfor %}
+    <div class="col">
+         <input type="submit" class="btn-check" id="btn1">
+         <label class="btn btn-warning" for="btn1">Обновить статусы</label>
+    </div>
+    <br>
+    <br>
+    <br>
     <h4 class="thin">На сегодня это все предложения. Хотите организовать свою поездку? - заполните форму ниже</h4>
     <br>
     <br>
