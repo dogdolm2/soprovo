@@ -1,1 +1,1 @@
-You don't need a README, do you?
+Read aavolyntsev_application.md instead of this one
