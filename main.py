@@ -36,6 +36,47 @@ def send_mail(code, to_addrs, from_addr):
     smtp.quit()"""
 
 
+@application.route("/admin/", methods=['POST', 'GET'])
+def admin():
+    if flask.request.cookies.get("key") != "":
+        if flask.request.method == "POST":
+            print("entered post")
+            if flask.request.form.get("description") != '':
+                id = db_op.add_trip(flask.request.form.get("location"), flask.request.form.get("description"),
+                                    flask.request.form.get("class"),
+                                    flask.request.form.get("cost"), "На проверке",
+                                    flask.request.form.get("quant"))
+                db_op.add_participant(flask.request.cookies.get("key"), id)
+            return flask.redirect("/")
+        else:
+            tl = db_op.read_trips()
+            fl = list()
+            for i in range(len(tl)):
+                desc = list()
+                curline = ""
+                for i1 in range(len(tl[i][2])):
+                    if tl[i][2][i1] != const_enter:
+                        curline += str(tl[i][2][i1])
+                    else:
+                        desc.append(curline)
+                        curline = ""
+                desc.append(curline)
+                fl.append({"location": tl[i][1], "description": desc,
+                    "class": tl[i][3], "count": tl[i][0],
+                    "cost": 0, "state": tl[i][5], "quant": tl[i][6]})
+            key = flask.request.cookies.get("key")
+            fsd = {}
+            tsl = db_op.get_trips_verifies()
+            for i in range(len(tsl)):
+                if key in tsl[i]:
+                    fsd[i + 1] = True
+                else:
+                    fsd[i + 1] = False
+            del key
+            print(fsd)
+            return flask.render_template("registered-teacher.html", fl=fl, fsd=fsd)
+
+
 @application.route("/", methods=['POST', 'GET'])
 def index():
     if flask.request.cookies.get("key") is None:
