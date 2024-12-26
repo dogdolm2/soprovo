@@ -131,7 +131,7 @@ def index():
                             fsd[i + 1] = False
                     del key
                     print(fsd)
-                    return flask.render_template("registered-teacher.html", fl=fl, fsd=fsd)
+                    return flask.render_template("registered.html", fl=fl, fsd=fsd)
             else:
                 print("verified")
                 if flask.request.method == "POST":
@@ -171,6 +171,75 @@ def index():
                     del key
                     print(fsd)
                     return flask.render_template("registered.html", fl=fl, fsd=fsd)
+        else:
+            return flask.render_template("index.html")
+
+
+@application.route("/clear/")
+def clear():
+    if flask.request.cookies.get("key") is None:
+        return flask.render_template("index.html")
+    else:
+        print(flask.request.cookies.get("key"))
+        if db_op.check_whitelisting(flask.request.cookies.get("key")):
+            if len(str(flask.request.cookies.get("key"))) == 47:
+                print("verified")
+                tl = db_op.read_trips()
+                fl = list()
+                for i in range(len(tl)):
+                    if tl[i][5] != "На проверке":
+                        desc = list()
+                        curline = ""
+                        for i1 in range(len(tl[i][2])):
+                            if tl[i][2][i1] != const_enter:
+                                curline += str(tl[i][2][i1])
+                            else:
+                                desc.append(curline)
+                                curline = ""
+                        desc.append(curline)
+                        fl.append({"location": tl[i][1], "description": desc,
+                                   "class": tl[i][3], "count": tl[i][0],
+                                   "cost": 0, "state": tl[i][5], "quant": tl[i][6]})
+                key = flask.request.cookies.get("key")
+                fsd = {}
+                tsl = db_op.get_trips_verifies()
+                for i in range(len(tsl)):
+                    if key in tsl[i]:
+                        fsd[i + 1] = True
+                    else:
+                        fsd[i + 1] = False
+                del key
+                print(fsd)
+                return flask.render_template("clear.html", fl=fl, fsd=fsd)
+            else:
+                print("verified")
+                tl = db_op.read_trips()
+                fl = list()
+                for i in range(len(tl)):
+                    if tl[i][5] != "На проверке":
+                        desc = list()
+                        curline = ""
+                        for i1 in range(len(tl[i][2])):
+                            if tl[i][2][i1] != const_enter:
+                                curline += str(tl[i][2][i1])
+                            else:
+                                desc.append(curline)
+                                curline = ""
+                        desc.append(curline)
+                        fl.append({"location": tl[i][1], "description": desc,
+                                   "class": tl[i][3], "count": tl[i][0],
+                                   "cost": tl[i][4], "state": tl[i][5], "quant": tl[i][6]})
+                key = flask.request.cookies.get("key")
+                fsd = {}
+                tsl = db_op.get_trips_verifies()
+                for i in range(len(tsl)):
+                    if key in tsl[i]:
+                        fsd[i + 1] = True
+                    else:
+                        fsd[i + 1] = False
+                del key
+                print(fsd)
+                return flask.render_template("clear.html", fl=fl, fsd=fsd)
         else:
             return flask.render_template("index.html")
 
