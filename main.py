@@ -11,6 +11,7 @@ application = flask.Flask("__name__")
 const_enter = """
 """
 
+
 def check_mail(email, state):
     if state == "god":
         if email[-7:] == "@hse.ru":
@@ -39,14 +40,15 @@ def send_mail(code, to_addrs, from_addr):
 
 @application.route("/admin/", methods=['POST', 'GET'])
 def admin():
-    if flask.request.cookies.get("key") == "258004691558600667130842554304901163225639372" or \
-        flask.request.cookies.get("key") == "58341574981824171660262120297766530067860640204":
+    if flask.request.cookies.get("key") == "97905576762507071195365227107652262209004166140" or \
+            flask.request.cookies.get("key") == "58341574981824171660262120297766530067860640204":
         if flask.request.method == "POST":
             print("entered post")
             l = read_trips()
             for i in range(1, len(l) + 1):
                 print(l[i - 1][5], flask.request.form.get("state" + str(i)))
-                if l[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get("state" + str(i)) is not None:
+                if l[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get(
+                        "state" + str(i)) is not None:
                     db_op.update_state(i, flask.request.form.get("state" + str(i)))
             if flask.request.form.get("description") != '':
                 id = db_op.add_trip(flask.request.form.get("location"), flask.request.form.get("description"),
@@ -69,8 +71,8 @@ def admin():
                         curline = ""
                 desc.append(curline)
                 fl.append({"location": tl[i][1], "description": desc,
-                    "class": tl[i][3], "count": tl[i][0],
-                    "cost": tl[i][4], "state": tl[i][5], "quant": tl[i][6]})
+                           "class": tl[i][3], "count": tl[i][0],
+                           "cost": tl[i][4], "state": tl[i][5], "quant": tl[i][6]})
             key = flask.request.cookies.get("key")
             fsd = {}
             tsl = db_op.get_trips_verifies()
@@ -117,8 +119,8 @@ def index():
                                     curline = ""
                             desc.append(curline)
                             fl.append({"location": tl[i][1], "description": desc,
-                                "class": tl[i][3], "count": tl[i][0],
-                                "cost": 0, "state": tl[i][5], "quant": tl[i][6]})
+                                       "class": tl[i][3], "count": tl[i][0],
+                                       "cost": 0, "state": tl[i][5], "quant": tl[i][6]})
                     key = flask.request.cookies.get("key")
                     fsd = {}
                     tsl = db_op.get_trips_verifies()
@@ -198,12 +200,14 @@ def card(path):
                                 curline = ""
                         desc.append(curline)
                         fl = {"location": tl[1], "description": desc,
-                                    "class": tl[3], "count": tl[0],
-                                    "cost": 0, "state": tl[5], "quant": tl[6]}
+                              "class": tl[3], "count": tl[0],
+                              "cost": 0, "state": tl[5], "quant": tl[6]}
                         if len(db_op.read_trip_participants(path)) > int(tl[6]):
                             send_mail(
-                                "You need to reach agreement with " + db_op.read_trip_participants(path)[0] + " on letting " +
-                                db_op.read_trip_participants(path)[len(db_op.read_trip_participants(path)) - 1] + " join trip #" + str(path),
+                                "You need to reach agreement with " + db_op.read_trip_participants(path)[
+                                    0] + " on letting " +
+                                db_op.read_trip_participants(path)[
+                                    len(db_op.read_trip_participants(path)) - 1] + " join trip #" + str(path),
                                 "administrative_director@xn--80adghmg3aabhlj7izc.xn--p1ai",
                                 "generalniy_director@xn--80adghmg3aabhlj7izc.xn--p1ai")
                     if flask.request.form.get("var" + str(path)) is None and str(path).isnumeric() is True:
@@ -331,7 +335,8 @@ def login():
             md5_hashl = hashlib.new('md5')
             md5_hashl.update(flask.request.form.get("passw").encode())
             print(md5_hashl.hexdigest())
-            if md5_hashl.hexdigest() == pl[ul.index(flask.request.form.get("email"))] and db_op.check_whitelisting(fulll[ul.index(flask.request.form.get("email"))][1]):
+            if md5_hashl.hexdigest() == pl[ul.index(flask.request.form.get("email"))] and db_op.check_whitelisting(
+                    fulll[ul.index(flask.request.form.get("email"))][1]):
                 res = flask.redirect("/")
                 res.set_cookie("key", str(fulll[ul.index(flask.request.form.get("email"))][1]), 60 * 60 * 24 * 365 * 5)
                 return res
@@ -361,12 +366,17 @@ def register():
                                                 99999999999999999999999999999999999999999999999))
             else:
                 verifylink = str(random.randint(100000000, 1000000000000000000000000000000000000000000000))
-            send_mail("Your verification code link is https://xn--80adghmg3aabhlj7izc.xn--p1ai/verify/" + str(verifylink), flask.request.form.get("email"), "noreply@xn--80adghmg3aabhlj7izc.xn--p1ai") # temp bypassed in function
+            send_mail(
+                "Your verification code link is https://xn--80adghmg3aabhlj7izc.xn--p1ai/verify/" + str(verifylink),
+                flask.request.form.get("email"),
+                "noreply@xn--80adghmg3aabhlj7izc.xn--p1ai")  # temp bypassed in function
             md5_hashl = hashlib.new('md5')
             md5_hashl.update(verifylink.encode())
             md5_hashp = hashlib.new('md5')
             md5_hashp.update(flask.request.form.get("passw").encode())
-            db_op.add_user(flask.request.form.get("email"), flask.request.form.get("FIO1"), flask.request.form.get("FIO2"), flask.request.form.get("FIO3"), md5_hashp.hexdigest(), verifylink)
+            db_op.add_user(flask.request.form.get("email"), flask.request.form.get("FIO1"),
+                           flask.request.form.get("FIO2"), flask.request.form.get("FIO3"), md5_hashp.hexdigest(),
+                           verifylink)
             return flask.render_template("index.html", show={"show": 1})
         else:
             return flask.render_template("register.html")
@@ -402,9 +412,11 @@ def verify(path):
     else:
         return 'Почта НЕ подтверждена! <a href="/">На главную</a>'
 
+
 @application.route('/contacts/')
 def contacts():
     return flask.render_template("contacts.html")
+
 
 @application.route('/documents/<path:path>/')
 def document_files(path):
@@ -418,6 +430,21 @@ def document_files(path):
     tempf.close()
     documents.generateSpravka(len(wl) - 1, path)
     return flask.send_file("output.pdf")
+
+
+@application.route('/documents_admin/<path:path>/')
+def document_admin_files(path):
+    lcodes = db_op.read_trip_participants(path)
+    tempf = open("temp.txt", "w", encoding="utf-8")
+    wl = ["Фамилия,Имя,Отчество,Электронная Почта,\n"]
+    for i in range(len(lcodes)):
+        curuser = db_op.get_user_data(verify_number=lcodes[i])
+        wl.append(curuser[5] + "," + curuser[6] + "," + curuser[7] + "," + curuser[2] + "\n")
+    tempf.writelines(wl)
+    tempf.close()
+    documents.generateAdminSpravka(len(wl) - 1, path)
+    return flask.send_file("output.pdf")
+
 
 @application.route('/raw/<path:path>/')
 def raw_files(path):
