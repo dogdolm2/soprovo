@@ -1,10 +1,10 @@
-import flask
 import hashlib
 import random
-#import os
-#import smtplib
-import documents
 import db_op
+# import os
+# import smtplib
+import documents
+import flask
 
 application = flask.Flask("__name__")
 const_enter = """
@@ -43,10 +43,10 @@ def admin():
             flask.request.cookies.get("key") == "58341574981824171660262120297766530067860640204":
         if flask.request.method == "POST":
             print("entered post")
-            l = read_trips()
-            for i in range(1, len(l) + 1):
-                print(l[i - 1][5], flask.request.form.get("state" + str(i)))
-                if l[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get(
+            tr = db_op.read_trips()
+            for i in range(1, len(tr) + 1):
+                print(tr[i - 1][5], flask.request.form.get("state" + str(i)))
+                if tr[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get(
                         "state" + str(i)) is not None:
                     db_op.update_state(i, flask.request.form.get("state" + str(i)))
             if flask.request.form.get("description") != '':
