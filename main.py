@@ -1,11 +1,10 @@
 import flask
 import hashlib
 import random
-import os
-import smtplib
+#import os
+#import smtplib
 import documents
 import db_op
-from db_op import read_trips
 
 application = flask.Flask("__name__")
 const_enter = """
