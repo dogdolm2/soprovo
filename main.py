@@ -1,11 +1,10 @@
-import flask
 import hashlib
 import random
-import os
-import smtplib
-import documents
 import db_op
-from db_op import read_trips
+# import os
+# import smtplib
+import documents
+import flask
 
 application = flask.Flask("__name__")
 const_enter = """
@@ -44,10 +43,10 @@ def admin():
             flask.request.cookies.get("key") == "58341574981824171660262120297766530067860640204":
         if flask.request.method == "POST":
             print("entered post")
-            l = read_trips()
-            for i in range(1, len(l) + 1):
-                print(l[i - 1][5], flask.request.form.get("state" + str(i)))
-                if l[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get(
+            tr = db_op.read_trips()
+            for i in range(1, len(tr) + 1):
+                print(tr[i - 1][5], flask.request.form.get("state" + str(i)))
+                if tr[i - 1][5] != flask.request.form.get("state" + str(i)) and flask.request.form.get(
                         "state" + str(i)) is not None:
                     db_op.update_state(i, flask.request.form.get("state" + str(i)))
             if flask.request.form.get("description") != '':
@@ -388,6 +387,44 @@ def card(path):
                     return flask.render_template("cards.html", fl=fl, fsd=fsd, path=str(path), l=l, ac=actual_quant)
         else:
             return flask.render_template("index.html")
+
+
+@application.route("/preview/<path:path>/")
+def preview(path):
+    tsl = db_op.read_trip_participants(path)
+    tl = db_op.read_trips()[int(path) - 1]
+    desc = list()
+    curline = ""
+    for i1 in range(len(tl[2])):
+        if tl[2][i1] != const_enter:
+            curline += tl[2][i1]
+        else:
+            desc.append(curline)
+            curline = ""
+    desc.append(curline)
+    fl = {"location": tl[1], "description": desc,
+          "class": tl[3], "count": tl[0],
+          "cost": 0, "state": tl[5], "quant": int(tl[6])}
+    lcodes = db_op.read_trip_participants(path)
+    l = list()
+    actual_quant = len(lcodes) - 1
+    if int(fl["quant"]) <= actual_quant:
+        fl["state"] = "Участники набраны"
+    for i in range(len(lcodes)):
+        cur_user = db_op.get_user_data(verify_number=lcodes[i])
+        l.append(str(cur_user[5] + " " + cur_user[6] + " " + cur_user[7]))
+        if len(lcodes[i]) == 47:
+            l[-1] += " - сопровождающий"
+    key = flask.request.cookies.get("key")
+    fsd = {}
+    for i in range(len(tsl)):
+        if key == tsl[i]:
+            fsd[path] = True
+        else:
+            fsd[path] = False
+    del key
+    print(fsd)
+    return flask.render_template("preview.html", fl=fl, fsd=fsd, path=str(path), l=l, ac=actual_quant)
 
 
 @application.route("/login/", methods=["POST", "GET"])
