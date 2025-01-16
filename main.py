@@ -492,7 +492,7 @@ def register():
 
 @application.route('/style/<path:path>')
 def stylefiles(path):
-    return flask.send_from_directory('../../soprovo-experimental/soprovo-experimental/style', path)
+    return flask.send_from_directory('style', path)
 
 
 @application.route('/clearcookie/')
