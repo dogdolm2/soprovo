@@ -45,8 +45,8 @@ def generateAdminSpravka(count, id, filename="temp.txt"):
     pdf.set_font('DejaVu', size=11)
     pdf.add_page()
     current_time = datetime.datetime.now()
-    pdf.multi_cell(190, 8, str(str(current_time.year) + "." + str(current_time.month) + "."
-                               + str(current_time.day)),
+    pdf.multi_cell(190, 8, str(str(current_time.day) + "." + str(current_time.month) + "."
+                               + str(current_time.year)),
                    align="L")
     pdf.ln(30)
     pdf.set_font('DejaVu', size=20)
@@ -90,8 +90,8 @@ def generateSpravka(count, id, filename="temp.txt"):
     pdf.set_font('DejaVu', size=11)
     pdf.add_page()
     current_time = datetime.datetime.now()
-    pdf.multi_cell(190, 8, str(str(current_time.year) + "." + str(current_time.month) + "."
-                               + str(current_time.day)),
+    pdf.multi_cell(190, 8, str(str(current_time.day) + "." + str(current_time.month) + "."
+                               + str(current_time.year)),
                    align="L")
     pdf.ln(30)
     pdf.set_font('DejaVu', size=22)
