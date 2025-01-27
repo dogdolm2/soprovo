@@ -85,7 +85,7 @@ def admin():
             return flask.render_template("admin.html", fl=fl, fsd=fsd)
 
 
-@application.route("/", methods=['POST', 'GET'])
+@application.route("/goto/", methods=['POST', 'GET'])
 def index():
     if flask.request.cookies.get("key") is None:
         return flask.render_template("index.html")
@@ -522,6 +522,16 @@ def verify(path):
 @application.route('/contacts/')
 def contacts():
     return flask.render_template("contacts.html")
+
+
+@application.route('/')
+def mega():
+    return flask.render_template("mega.html")
+
+
+@application.route('/match/')
+def match():
+    return flask.render_template("match.html")
 
 
 @application.route('/documents/<path:path>/')
