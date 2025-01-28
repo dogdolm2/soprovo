@@ -15,7 +15,7 @@ from aiogram.types import (
 )
 import sqlite3
 
-API_TOKEN = '7440867669:AAF9StcZKBZPJmHcVebM5nQkHDHTsF1lEKU'
+API_TOKEN = 'BOT_TOKEN'
 
 # Initialize bot, dispatcher, and router
 bot = Bot(token=API_TOKEN)
@@ -89,7 +89,7 @@ async def register_command(message: Message, state: FSMContext):
         )
         return
 
-    await message.answer("What's your name?")
+    await message.answer("Как тебя называть?")
     await state.set_state(RegisterProfile.name)
 
 
@@ -98,7 +98,7 @@ async def register_command(message: Message, state: FSMContext):
 @router.message(RegisterProfile.name)
 async def get_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer("Write a short bio about yourself.")
+    await message.answer("Напиши о себе, желательно упомяни возраст и корпус лицея")
     await state.set_state(RegisterProfile.bio)
 
 
@@ -106,7 +106,7 @@ async def get_name(message: Message, state: FSMContext):
 @router.message(RegisterProfile.bio)
 async def get_bio(message: Message, state: FSMContext):
     await state.update_data(bio=message.text)
-    await message.answer("Now send me a photo of yourself.")
+    await message.answer("Какую фотку поставить тебе на анкету?")
     await state.set_state(RegisterProfile.photo)
 
 
@@ -118,7 +118,11 @@ async def save_profile(message: Message, state: FSMContext):
     name = data.get("name")
     bio = data.get("bio")
     username = message.from_user.username or "No username"
-
+    await bot.send_photo(
+        chat_id=message.chat.id,
+        photo=photo_id,
+        caption=f"Твоя анкета:\n{name} - {bio}",
+    )
     with sqlite3.connect(db_file) as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -127,7 +131,7 @@ async def save_profile(message: Message, state: FSMContext):
         conn.commit()
 
     await state.clear()
-    await message.answer("Profile created successfully! You can now view profiles.", reply_markup=menu_kb)
+    await message.answer("Теперь можешь знакомиться, нажми на кнопку внизу.", reply_markup=menu_kb)
 
 
 # Viewing Profiles
@@ -154,12 +158,11 @@ async def view_profiles(message: Message):
 
         await show_profile(message, profile)
     else:
-        await message.answer("No profiles available yet.")
+        await message.answer("Пока нет анкет, кроме тебя")
 
 
 async def show_profile(message: Message, profile):
     user_id, name, bio, photo_id, username = profile
-    contact_info = f"Contact: @{username}" if username != "No username" else "No username available"
 
     # Inline keyboard for actions
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -171,7 +174,7 @@ async def show_profile(message: Message, profile):
     await bot.send_photo(
         chat_id=message.chat.id,
         photo=photo_id,
-        caption=f"Name: {name}\nBio: {bio}",
+        caption=f"{name} - {bio}",
         reply_markup=keyboard
     )
 
@@ -205,18 +208,16 @@ async def handle_like(callback: CallbackQuery):
 
         # Send match notification with profile details to both users
         match_message_liker = (
-            f"It's a match! 🎉 You both liked each other!\n\n"
-            f"Here is your match:\n"
-            f"Name: {liked_name}\n"
-            f"Bio: {liked_bio}\n"
-            f"Contact: @{liked_username}" if liked_username != "No username" else "No username available"
+            f"Есть взаимная симпатия!\n"
+            f"{liked_name} - "
+            f"{liked_bio}\n"
+            f"Можешь начинать общаться: @{liked_username}" if liked_username != "No username" else "No username available"
         )
         match_message_liked = (
-            f"It's a match! 🎉 You both liked each other!\n\n"
-            f"Here is your match:\n"
-            f"Name: {liker_name}\n"
-            f"Bio: {liker_bio}\n"
-            f"Contact: @{liker_username}" if liker_username != "No username" else "No username available"
+            f"Есть взаимная симпатия!\n"
+            f"{liker_name} - "
+            f"{liker_bio}\n"
+            f"Можешь начинать общаться: @{liker_username}" if liker_username != "No username" else "No username available"
         )
 
         # Send profile details to the liker
@@ -232,12 +233,9 @@ async def handle_like(callback: CallbackQuery):
             photo=liker_photo,
             caption=match_message_liked
         )
-
-        # Notify both users in the callback
-        await callback.message.answer("It's a match! 🎉 Check your messages for details.")
     else:
         # If no match yet, just confirm the like
-        await callback.message.answer("Liked! Keep browsing for more profiles.")
+        await callback.message.answer("Листай дальше, скажем, если лайк взаимный")
 
     # Acknowledge the callback query
     await callback.answer()
@@ -274,8 +272,8 @@ async def handle_next(callback: CallbackQuery):
 
 # Command: Update Profile
 @router.message(F.text == "Update Profile")
-async def update_profile(message: Message):
-    await message.answer("Use /register to update your profile.")
+async def update_profile(message: Message, state: FSMContext):
+    await register_command(message, state)
 
 
 # Main entry point
