@@ -14,7 +14,7 @@ from aiogram.types import (
 )
 import sqlite3
 
-API_TOKEN = 'BOT_TOKEN'
+API_TOKEN = '7708888353:AAEkycjJE8GuOQ_rsfmsp5LBWEZeuRCyfHsN'
 
 # Initialize bot, dispatcher, and router
 bot = Bot(token=API_TOKEN)
