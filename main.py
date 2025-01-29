@@ -5,9 +5,6 @@ import db_op
 import smtplib
 import documents
 import flask
-import telebot
-import asyncio
-import multiprocessing
 
 
 application = flask.Flask("__name__")
@@ -515,9 +512,9 @@ def money():
 def verify(path):
     vl = db_op.read_users_verify_number()
     if str(path) in vl:
-        res = flask.redirect("/")
+        res = flask.redirect("/goto/")
         res.set_cookie("key", str(path), 60 * 60 * 24 * 365 * 5)
-        db_op.check_whitelisting(path)
+        db_op.whitelist_user(path)
         return res
     else:
         return 'Почта НЕ подтверждена! <a href="/">На главную</a>'
