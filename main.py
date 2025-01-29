@@ -2,7 +2,7 @@ import hashlib
 import random
 import db_op
 # import os
-# import smtplib
+import smtplib
 import documents
 import flask
 import telebot
@@ -29,16 +29,16 @@ def check_mail(email, state):
 
 
 def send_mail(code, to_addrs, from_addr):
-    """lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
+    lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
              code]
     msg = "\r\n".join(lines)
     smtp = smtplib.SMTP('mail.hosting.reg.ru', 587)
     smtp.set_debuglevel(False)
     smtp.connect('mail.hosting.reg.ru', 587)
     smtp.ehlo()
-    smtp.login(from_addr, 'AntonVolky2009*')
+    smtp.login(from_addr, 'PASSW')
     smtp.sendmail(from_addr, to_addrs, msg)
-    smtp.quit()"""
+    smtp.quit()
 
 
 @application.route("/admin/", methods=['POST', 'GET'])
@@ -579,16 +579,5 @@ def raw_files(path):
     return flask.send_file("output.csv", as_attachment=True)
 
 
-def app_run():
-    if __name__ == '__main__':
-        application.run()
-
-def telebot_run():
-    if __name__ == "__main__":
-        asyncio.run(telebot.main())
-
-process1 = multiprocessing.Process(target=app_run)
-process2 = multiprocessing.Process(target=telebot_run)
-
-process1.start()
-process2.start()
+if __name__ == '__main__':
+    application.run()
