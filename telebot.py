@@ -1,7 +1,6 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -211,8 +210,8 @@ async def show_profile(message: Message, profile):
     # Inline keyboard for actions
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="👍", callback_data=f"like_{user_id}"),
-            InlineKeyboardButton(text="Дальше", callback_data="next")
+            InlineKeyboardButton(text="❤️", callback_data=f"like_{user_id}"),
+            InlineKeyboardButton(text="👎", callback_data="next")
         ]
     ])
     await bot.send_photo(
