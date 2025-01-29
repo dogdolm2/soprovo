@@ -5,6 +5,10 @@ import db_op
 # import smtplib
 import documents
 import flask
+import telebot
+import asyncio
+import multiprocessing
+
 
 application = flask.Flask("__name__")
 const_enter = """
@@ -575,5 +579,16 @@ def raw_files(path):
     return flask.send_file("output.csv", as_attachment=True)
 
 
-if __name__ == '__main__':
-    application.run()
+def app_run():
+    if __name__ == '__main__':
+        application.run()
+
+def telebot_run():
+    if __name__ == "__main__":
+        asyncio.run(telebot.main())
+
+process1 = multiprocessing.Process(target=app_run)
+process2 = multiprocessing.Process(target=telebot_run)
+
+process1.start()
+process2.start()
