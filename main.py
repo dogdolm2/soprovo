@@ -2,9 +2,10 @@ import hashlib
 import random
 import db_op
 # import os
-# import smtplib
+import smtplib
 import documents
 import flask
+
 
 application = flask.Flask("__name__")
 const_enter = """
@@ -25,16 +26,16 @@ def check_mail(email, state):
 
 
 def send_mail(code, to_addrs, from_addr):
-    """lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
+    lines = [f"From: {from_addr}", f"To: {', '.join(to_addrs)}",
              code]
     msg = "\r\n".join(lines)
     smtp = smtplib.SMTP('mail.hosting.reg.ru', 587)
     smtp.set_debuglevel(False)
     smtp.connect('mail.hosting.reg.ru', 587)
     smtp.ehlo()
-    smtp.login(from_addr, 'AntonVolky2009*')
+    smtp.login(from_addr, 'PASSW')
     smtp.sendmail(from_addr, to_addrs, msg)
-    smtp.quit()"""
+    smtp.quit()
 
 
 @application.route("/admin/", methods=['POST', 'GET'])
@@ -511,9 +512,9 @@ def money():
 def verify(path):
     vl = db_op.read_users_verify_number()
     if str(path) in vl:
-        res = flask.redirect("/")
+        res = flask.redirect("/goto/")
         res.set_cookie("key", str(path), 60 * 60 * 24 * 365 * 5)
-        db_op.check_whitelisting(path)
+        db_op.whitelist_user(path)
         return res
     else:
         return 'Почта НЕ подтверждена! <a href="/">На главную</a>'
