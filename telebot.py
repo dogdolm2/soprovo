@@ -15,7 +15,7 @@ from aiogram.types import (
 )
 import sqlite3
 
-API_TOKEN = 'BOT_TOKEN'
+API_TOKEN = '7708888353:AAHsQbzq3HGKbZkEiX_uw7eucL1uDNBuBxs'
 
 # Initialize bot, dispatcher, and router
 bot = Bot(token=API_TOKEN)
@@ -93,18 +93,23 @@ async def register_command(message: Message, state: FSMContext):
             "You need a Telegram username to register! Please set a username in your Telegram settings and try again."
         )
         return
-
     await message.answer("Как тебя называть?")
     await state.set_state(RegisterProfile.name)
 
 @router.message(RegisterProfile.name)
 async def get_name(message: Message, state: FSMContext):
+    if message.text == "Смотреть анкеты" or message.text == "Заполнить анкету заново":
+        await message.answer("Как тебя называть?")
+        await state.set_state(RegisterProfile.name)
     await state.update_data(name=message.text)
     await message.answer("Напиши немного о себе. Желательно укажи корпус")
     await state.set_state(RegisterProfile.bio)
 
 @router.message(RegisterProfile.bio)
 async def get_bio(message: Message, state: FSMContext):
+    if message.text == "Смотреть анкеты" or message.text == "Заполнить анкету заново":
+        await message.answer("Напиши немного о себе. Желательно укажи корпус")
+        await state.set_state(RegisterProfile.bio)
     await state.update_data(bio=message.text)
     await message.answer("Какое фото поставить на анкету?")
     await state.set_state(RegisterProfile.photo)
@@ -336,7 +341,3 @@ async def update_profile(message: Message, state: FSMContext):
 # Main entry point
 async def main():
     await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
