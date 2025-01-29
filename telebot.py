@@ -341,3 +341,5 @@ async def update_profile(message: Message, state: FSMContext):
 # Main entry point
 async def main():
     await dp.start_polling(bot)
+
+asyncio.run(main())
