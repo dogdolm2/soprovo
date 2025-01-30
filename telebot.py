@@ -1,7 +1,6 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -79,6 +78,25 @@ menu_kb = ReplyKeyboardMarkup(
 )
 
 
+menu_gender = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Парень"),  # Each row is a list of buttons
+        KeyboardButton(text="Девушка")]
+    ],
+    resize_keyboard=True
+)
+
+
+menu_gender_choose = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Парней"),  # Each row is a list of buttons
+        KeyboardButton(text="Девушек"),
+        KeyboardButton(text="Всех")]
+    ],
+    resize_keyboard=True
+)
+
+
 # Command: /start
 @router.message(Command("start"))
 async def start_command(message: Message):
@@ -108,7 +126,7 @@ async def get_name(message: Message, state: FSMContext):
 @router.message(RegisterProfile.bio)
 async def get_bio(message: Message, state: FSMContext):
     if message.text == "Смотреть анкеты" or message.text == "Заполнить анкету заново":
-        await message.answer("Напиши немного о себе. Желательно укажи корпус")
+        await message.answer("Напиши немного о себе. Желательно укажи корпус или направление")
         await state.set_state(RegisterProfile.bio)
     await state.update_data(bio=message.text)
     await message.answer("Какое фото поставить на анкету?")
@@ -121,26 +139,34 @@ async def get_photo(message: Message, state: FSMContext):
         await message.answer("Какое фото поставить на анкету?")
         await state.set_state(RegisterProfile.photo)
     await state.update_data(photo_id=photo_id)
-    await message.answer("Твой пол: Male, Female?")
+    await message.answer("Теперь определимся с полом", reply_markup=menu_gender)
     await state.set_state(RegisterProfile.gender)
 
 @router.message(RegisterProfile.gender)
 async def get_gender(message: Message, state: FSMContext):
-    if message.text != "Male" and message.text != "Female":
-        await message.answer("Твой пол: Male, Female")
+    if message.text != "Парень" and message.text != "Девушка":
+        await message.answer("Теперь определимся с полом", reply_markup=menu_gender)
         await state.set_state(RegisterProfile.gender)
     else:
-        await state.update_data(gender=message.text)
-        await message.answer("Кого ищешь: Male, Female, Any")
+        if message.text == "Парень":
+            await state.update_data(gender="Male")
+        else:
+            await state.update_data(gender="Female")
+        await message.answer("Кого тебе показывать?", reply_markup=menu_gender_choose)
         await state.set_state(RegisterProfile.looking_for)
 
 @router.message(RegisterProfile.looking_for)
 async def get_looking_for(message: Message, state: FSMContext):
-    if message.text != "Male" and message.text != "Female" and message.text != "Any":
-        await message.answer("Кого ищешь: Male, Female, Any")
+    if message.text != "Парней" and message.text != "Девушек" and message.text != "Всех":
+        await message.answer("Кого тебе показывать?", reply_markup=menu_gender_choose)
         await state.set_state(RegisterProfile.looking_for)
     else:
-        await state.update_data(looking_for=message.text)
+        if message.text == "Парней":
+            await state.update_data(looking_for="Male")
+        elif message.text == "Девушек":
+            await state.update_data(looking_for="Female")
+        else:
+            await state.update_data(looking_for="Any")
         data = await state.get_data()
         name = data.get("name")
         bio = data.get("bio")
@@ -211,8 +237,8 @@ async def show_profile(message: Message, profile):
     # Inline keyboard for actions
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="👍", callback_data=f"like_{user_id}"),
-            InlineKeyboardButton(text="Дальше", callback_data="next")
+            InlineKeyboardButton(text="❤️", callback_data=f"like_{user_id}"),
+            InlineKeyboardButton(text="👎", callback_data="next")
         ]
     ])
     await bot.send_photo(
