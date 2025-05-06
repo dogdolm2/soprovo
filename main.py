@@ -5,7 +5,7 @@ import db_op
 import smtplib
 import documents
 import flask
-
+# for bandit
 
 application = flask.Flask("__name__")
 const_enter = """
